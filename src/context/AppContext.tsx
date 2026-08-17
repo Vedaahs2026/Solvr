@@ -561,6 +561,24 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
     setOrders((prev) => [newOrder, ...prev]);
     clearCart();
+
+    // Trigger admin email notification
+    fetch("/api/send-email", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(newOrder)
+    })
+      .then((res) => {
+        if (!res.ok) {
+          console.error("Failed to send order email:", res.statusText);
+        }
+      })
+      .catch((err) => {
+        console.error("Error calling send-email API:", err);
+      });
+
     return newOrder;
   };
 

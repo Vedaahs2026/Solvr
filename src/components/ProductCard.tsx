@@ -63,7 +63,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       style={{
-        backgroundColor: "var(--white)",
+        backgroundColor: "#ffffff",
         borderRadius: "0px", // Rectangular cards matching the screenshot style
         boxShadow: "var(--shadow-sm)",
         border: "none",
@@ -84,68 +84,75 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         }
       `}</style>
 
-      {/* Stock status badge */}
+      {/* White padding wrapper around the image container */}
       <div style={{
-        position: "absolute",
-        top: "12px",
-        right: "12px",
-        zIndex: 2
+        padding: "12px 12px 0 12px",
+        backgroundColor: "#ffffff"
       }}>
-        {isOutOfStock ? (
-          <span className="badge badge-danger" style={{ borderRadius: "2px", fontSize: "0.65rem" }}>Out of Stock</span>
-        ) : product.stock < 10 ? (
-          <span className="badge badge-warning" style={{ borderRadius: "2px", fontSize: "0.65rem" }}>Only {product.stock} Left</span>
-        ) : null}
-      </div>
-
-      {/* Tall Portrait Image Container (matches screenshot ratio) */}
-      <div style={{
-        width: "100%",
-        height: "360px",
-        overflow: "hidden",
-        backgroundColor: "var(--bg-beige-dark)",
-        position: "relative"
-      }}>
-        <img 
-          src={imagesList[activeImageIndex]} 
-          alt={product.name} 
-          style={{
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            transition: "all 0.4s ease"
-          }}
-          loading="lazy"
-        />
-
-        {/* Carousel dot indicators on hover */}
-        {imagesList.length > 1 && (
+        {/* Tall Portrait Image Container with shadow along the image */}
+        <div style={{
+          width: "100%",
+          height: "360px",
+          overflow: "hidden",
+          backgroundColor: "var(--bg-beige-dark)",
+          position: "relative",
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)"
+        }}>
+          {/* Stock status badge */}
           <div style={{
             position: "absolute",
-            bottom: "12px",
-            left: "50%",
-            transform: "translateX(-50%)",
-            display: "flex",
-            gap: "6px",
-            zIndex: 3,
-            backgroundColor: "rgba(0, 0, 0, 0.25)",
-            padding: "4px 8px",
-            borderRadius: "10px"
+            top: "12px",
+            right: "12px",
+            zIndex: 2
           }}>
-            {imagesList.map((_, dotIdx) => (
-              <span 
-                key={dotIdx}
-                style={{
-                  width: "6px",
-                  height: "6px",
-                  borderRadius: "50%",
-                  backgroundColor: dotIdx === activeImageIndex ? "var(--white)" : "rgba(255, 255, 255, 0.4)",
-                  transition: "background-color 0.3s ease"
-                }}
-              />
-            ))}
+            {isOutOfStock ? (
+              <span className="badge badge-danger" style={{ borderRadius: "2px", fontSize: "0.65rem" }}>Out of Stock</span>
+            ) : product.stock < 10 ? (
+              <span className="badge badge-warning" style={{ borderRadius: "2px", fontSize: "0.65rem" }}>Only {product.stock} Left</span>
+            ) : null}
           </div>
-        )}
+
+          <img 
+            src={imagesList[activeImageIndex]} 
+            alt={product.name} 
+            style={{
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+              transition: "all 0.4s ease"
+            }}
+            loading="lazy"
+          />
+
+          {/* Carousel dot indicators on hover */}
+          {imagesList.length > 1 && (
+            <div style={{
+              position: "absolute",
+              bottom: "12px",
+              left: "50%",
+              transform: "translateX(-50%)",
+              display: "flex",
+              gap: "6px",
+              zIndex: 3,
+              backgroundColor: "rgba(0, 0, 0, 0.25)",
+              padding: "4px 8px",
+              borderRadius: "10px"
+            }}>
+              {imagesList.map((_, dotIdx) => (
+                <span 
+                  key={dotIdx}
+                  style={{
+                    width: "6px",
+                    height: "6px",
+                    borderRadius: "50%",
+                    backgroundColor: dotIdx === activeImageIndex ? "var(--white)" : "rgba(255, 255, 255, 0.4)",
+                    transition: "background-color 0.3s ease"
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Content Section (centered text, matching screenshot style) */}
@@ -155,7 +162,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         flexDirection: "column",
         alignItems: "center",
         textAlign: "center",
-        backgroundColor: "var(--white)",
+        backgroundColor: "#ffffff",
         flex: 1
       }}>
         {/* Product Name (Uppercase, truncated with ellipses) */}
