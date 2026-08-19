@@ -8,7 +8,8 @@ import {
 } from "./defaultData";
 
 export const db = createClient({
-  url: "file:local.db"
+  url: process.env.TURSO_DATABASE_URL || "libsql://solvr-veda-ahs.aws-ap-south-1.turso.io",
+  authToken: process.env.TURSO_AUTH_TOKEN || "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3ODcxNTU1OTQsImlkIjoiMDFhMDFhYzUtZTYwMS03ZDNlLWJiMzYtZjc4MzQzZGZlZmY3Iiwia2lkIjoiTnA5UFJEWlN3QkZ5dXd1Z3BoUkV4MW5RbXlwZmlVSzhGVU00VVF5aEVyRSIsInJpZCI6IjRhYWVhNWMyLWUxNDMtNGVjMS1hZmNhLTk4MjFhMmIwMDMxMSJ9.MGSuVnd2hzsQlOMUc7X3pUMtltCe7KFWAv8_MgGYDabSo1ebHtWMBS-XPqJsFZsuqBlRLq_84P6hlBd13V5KAw"
 });
 
 let isInitialized = false;
