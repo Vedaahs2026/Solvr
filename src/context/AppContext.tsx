@@ -479,7 +479,19 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const storedUser = localStorage.getItem("solvr_current_user");
       const storedAdmin = localStorage.getItem("solvr_admin_user");
 
-      setProducts(storedProducts ? JSON.parse(storedProducts) : DEFAULT_PRODUCTS);
+      let initialProducts: Product[] = DEFAULT_PRODUCTS;
+      if (storedProducts) {
+        try {
+          const parsedProducts: Product[] = JSON.parse(storedProducts);
+          const existingProdIds = new Set(parsedProducts.map((p) => p.id));
+          const missingDefaults = DEFAULT_PRODUCTS.filter((dp) => !existingProdIds.has(dp.id));
+          initialProducts = [...parsedProducts, ...missingDefaults];
+        } catch (e) {
+          initialProducts = DEFAULT_PRODUCTS;
+        }
+      }
+      setProducts(initialProducts);
+
       setCustomers(storedCustomers ? JSON.parse(storedCustomers) : DEFAULT_CUSTOMERS);
       setOrders(storedOrders ? JSON.parse(storedOrders) : DEFAULT_ORDERS);
       
@@ -497,10 +509,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       setAdminUser(storedAdmin ? JSON.parse(storedAdmin) : null);
       
       const storedHeroBanners = localStorage.getItem("solvr_hero_banners");
-      setHeroBanners(storedHeroBanners ? JSON.parse(storedHeroBanners) : DEFAULT_HERO_BANNERS);
+      let initialHeroBanners: HeroBanner[] = DEFAULT_HERO_BANNERS;
+      if (storedHeroBanners) {
+        try {
+          const parsedBanners: HeroBanner[] = JSON.parse(storedHeroBanners);
+          const existingBannerIds = new Set(parsedBanners.map((b) => b.id));
+          const missingBanners = DEFAULT_HERO_BANNERS.filter((db) => !existingBannerIds.has(db.id));
+          initialHeroBanners = [...parsedBanners, ...missingBanners];
+        } catch (e) {
+          initialHeroBanners = DEFAULT_HERO_BANNERS;
+        }
+      }
+      setHeroBanners(initialHeroBanners);
 
       const storedBlogs = localStorage.getItem("solvr_blogs");
-      setBlogs(storedBlogs ? JSON.parse(storedBlogs) : DEFAULT_BLOGS);
+      let initialBlogs: BlogPost[] = DEFAULT_BLOGS;
+      if (storedBlogs) {
+        try {
+          const parsedBlogs: BlogPost[] = JSON.parse(storedBlogs);
+          const existingBlogIds = new Set(parsedBlogs.map((b) => b.id));
+          const missingBlogs = DEFAULT_BLOGS.filter((db) => !existingBlogIds.has(db.id));
+          initialBlogs = [...parsedBlogs, ...missingBlogs];
+        } catch (e) {
+          initialBlogs = DEFAULT_BLOGS;
+        }
+      }
+      setBlogs(initialBlogs);
 
       setIsLoaded(true);
     }

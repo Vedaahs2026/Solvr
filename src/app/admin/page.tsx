@@ -868,13 +868,31 @@ export default function AdminPage() {
         {/* --- 1. DASHBOARD VIEW (Matches 3rd Image layout & colors) --- */}
         {activeTab === "Dashboard" && (
           <div>
-            <div style={{ marginBottom: "32px" }}>
-              <h1 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--primary-green)", marginBottom: "4px" }}>
-                Dashboard Overview
-              </h1>
-              <p style={{ color: "var(--text-muted)" }}>
-                ✨ Welcome back to the SOLVR management hub.
-              </p>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+              <div>
+                <h1 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--primary-green)", marginBottom: "4px" }}>
+                  Dashboard Overview
+                </h1>
+                <p style={{ color: "var(--text-muted)", margin: 0 }}>
+                  ✨ Welcome back to the SOLVR management hub.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                className="btn-outline"
+                style={{ padding: "10px 18px", fontSize: "0.85rem", fontWeight: 700 }}
+                onClick={() => {
+                  if (confirm("Reset local storage cache to restore default products, banners, and blogs from code?")) {
+                    localStorage.removeItem("solvr_products");
+                    localStorage.removeItem("solvr_hero_banners");
+                    localStorage.removeItem("solvr_blogs");
+                    window.location.reload();
+                  }
+                }}
+              >
+                🔄 Reset Local Data to Code Defaults
+              </button>
             </div>
 
             {/* Metric Cards (Round white cards with icons and status indicator) */}
