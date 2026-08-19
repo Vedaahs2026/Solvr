@@ -80,7 +80,7 @@ export default function SavedAddressesPage() {
   }
 
   // Find customer data to read addresses
-  const customer = customers.find((c) => c.phone === currentUser.phone);
+  const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase());
   const addresses = customer?.addresses || [];
 
   const handleFormSubmit = (e: React.FormEvent) => {
@@ -95,7 +95,7 @@ export default function SavedAddressesPage() {
     const formattedAddress = `${street.trim()}, ${cityVal.trim()}, ${stateVal.trim()} - ${pincode.trim()} (Name: ${fullName.trim()}, Phone: ${contactPhone.trim()})`;
     
     const updated = [...addresses, formattedAddress];
-    updateCustomer(currentUser.phone, currentUser.name, updated);
+    updateCustomer(currentUser.email, currentUser.name, currentUser.phone, updated);
     
     // Reset form states (keep default name and phone for next run)
     setStreet("");
@@ -110,7 +110,7 @@ export default function SavedAddressesPage() {
 
   const handleDeleteAddress = (indexToDelete: number) => {
     const updated = addresses.filter((_, idx) => idx !== indexToDelete);
-    updateCustomer(currentUser.phone, currentUser.name, updated);
+    updateCustomer(currentUser.email, currentUser.name, currentUser.phone, updated);
   };
 
   const handleCancel = () => {

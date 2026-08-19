@@ -12,25 +12,36 @@ interface UserProfileModalProps {
 export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose }) => {
   const { currentUser, customers, updateCustomer } = useApp();
   const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [phoneError, setPhoneError] = useState("");
   const [success, setSuccess] = useState(false);
 
   useEffect(() => {
     if (currentUser) {
       setName(currentUser.name);
+      setPhone(currentUser.phone);
+      setPhoneError("");
     }
   }, [currentUser, isOpen]);
 
   if (!isOpen || !currentUser) return null;
 
-  // Retrieve customer data to preserve addresses during update
-  const customer = customers.find((c) => c.phone === currentUser.phone);
+  // Retrieve customer data using email to preserve addresses during update
+  const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase());
   const addresses = customer?.addresses || [];
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
 
-    updateCustomer(currentUser.phone, name, addresses);
+    const cleanPhone = phone.trim().replace(/\D/g, "");
+    if (cleanPhone.length !== 10) {
+      setPhoneError("Phone number must be exactly 10 digits.");
+      return;
+    }
+
+    setPhoneError("");
+    updateCustomer(currentUser.email, name, cleanPhone, addresses);
     setSuccess(true);
     setTimeout(() => {
       setSuccess(false);
@@ -108,41 +119,28 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
 
         <form onSubmit={handleSaveProfile} style={{ textAlign: "left", display: "flex", flexDirection: "column", gap: "18px" }}>
           
-          {/* Registered Phone Number */}
+          {/* Registered Email ID */}
           <div className="form-group" style={{ margin: 0 }}>
             <label style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-green-dark)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Registered Phone Number
+              Registered Email ID
             </label>
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              backgroundColor: "rgba(6, 78, 59, 0.04)",
-              border: "1px solid rgba(6, 78, 59, 0.12)",
-              borderRadius: "14px",
-              padding: "12px 16px",
-              marginTop: "6px"
-            }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px", color: "var(--primary-green-dark)", fontWeight: 700, fontSize: "0.95rem" }}>
-                {/* Sleek SVG Phone Icon */}
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style={{ color: "var(--accent-gold)", flexShrink: 0 }}>
-                  <path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>
-                </svg>
-                <span>{currentUser.phone}</span>
-              </div>
-              <span style={{ 
-                fontSize: "0.72rem", 
-                fontWeight: 800, 
-                backgroundColor: "rgba(6, 78, 59, 0.1)", 
-                color: "var(--primary-green)", 
-                padding: "3px 9px", 
-                borderRadius: "12px",
-                textTransform: "uppercase",
-                letterSpacing: "0.04em"
-              }}>
-                ✓ Verified
-              </span>
-            </div>
+            <input
+              type="text"
+              className="form-control"
+              value={currentUser.email}
+              disabled
+              style={{
+                marginTop: "6px",
+                borderRadius: "14px",
+                padding: "12px 16px",
+                fontSize: "0.95rem",
+                fontWeight: "600",
+                border: "1.5px solid rgba(6, 78, 59, 0.1)",
+                backgroundColor: "rgba(6, 78, 59, 0.04)",
+                color: "var(--text-muted)",
+                cursor: "not-allowed"
+              }}
+            />
           </div>
 
           {/* Your Name */}
@@ -158,7 +156,6 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
               onChange={(e) => setName(e.target.value)}
               placeholder="Enter your name"
               required
-              autoFocus
               style={{
                 marginTop: "6px",
                 borderRadius: "14px",
@@ -169,6 +166,37 @@ export const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onCl
                 backgroundColor: "#ffffff"
               }}
             />
+          </div>
+
+          {/* Mobile Number */}
+          <div className="form-group" style={{ margin: 0 }}>
+            <label htmlFor="edit-phone" style={{ fontSize: "0.78rem", fontWeight: 800, color: "var(--primary-green-dark)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+              Mobile Number
+            </label>
+            <input
+              id="edit-phone"
+              type="tel"
+              className="form-control"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              maxLength={10}
+              placeholder="Enter 10-digit number"
+              required
+              style={{
+                marginTop: "6px",
+                borderRadius: "14px",
+                padding: "12px 16px",
+                fontSize: "0.95rem",
+                fontWeight: "600",
+                border: "1.5px solid rgba(6, 78, 59, 0.2)",
+                backgroundColor: "#ffffff"
+              }}
+            />
+            {phoneError && (
+              <span style={{ color: "var(--error)", fontSize: "0.75rem", marginTop: "4px", display: "block" }}>
+                {phoneError}
+              </span>
+            )}
           </div>
 
           {/* Action Buttons */}

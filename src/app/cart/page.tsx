@@ -88,7 +88,7 @@ export default function CartPage() {
       setContactPhone(currentUser.phone);
       
       // Auto-select first address if they have saved ones
-      const customer = customers.find((c) => c.phone === currentUser.phone);
+      const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase());
       if (customer?.addresses && customer.addresses.length > 0) {
         setSelectedAddress(customer.addresses[0]);
       } else {
@@ -129,12 +129,12 @@ export default function CartPage() {
     const formattedAddress = `${street.trim()}, ${cityVal.trim()}, ${stateVal.trim()} - ${pincode.trim()} (Name: ${fullName.trim()}, Phone: ${contactPhone.trim()})`;
     
     // Save to customer profile in database
-    const customer = customers.find((c) => c.phone === currentUser?.phone);
+    const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser?.email.trim().toLowerCase());
     const existingAddresses = customer?.addresses || [];
     const updated = [...existingAddresses, formattedAddress];
     
     if (currentUser) {
-      updateCustomer(currentUser.phone, currentUser.name, updated);
+      updateCustomer(currentUser.email, currentUser.name, currentUser.phone, updated);
     }
     
     // Select the new address and return to options list

@@ -64,10 +64,10 @@ export default function MyOrdersPage() {
     );
   }
 
-  // Filter orders by phone number (normalizing search lookup)
-  const cleanUserPhone = currentUser.phone.trim().replace(/\D/g, "");
+  // Filter orders by email
+  const cleanUserEmail = currentUser.email.trim().toLowerCase();
   const userOrders = orders.filter(
-    (o: Order) => o.customerPhone.trim().replace(/\D/g, "") === cleanUserPhone
+    (o: Order) => o.customerEmail && o.customerEmail.trim().toLowerCase() === cleanUserEmail
   );
 
   // Status mapping for the Timeline tracking bar

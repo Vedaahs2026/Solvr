@@ -37,6 +37,7 @@ export interface Product {
 }
 
 export interface Customer {
+  email: string;
   phone: string;
   name: string;
   createdAt: string;
@@ -98,6 +99,7 @@ export interface Order {
   id: string;
   customerPhone: string;
   customerName: string;
+  customerEmail?: string;
   date: string;
   status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled";
   items: OrderItem[];
@@ -116,7 +118,7 @@ export interface AppContextType {
   orders: Order[];
   
   // Auth
-  currentUser: { phone: string; name: string } | null;
+  currentUser: { email: string; phone: string; name: string } | null;
   adminUser: { username: string } | null;
   customers: Customer[];
   isLoginOpen: boolean;
@@ -134,9 +136,9 @@ export interface AppContextType {
   clearCart: () => void;
   
   // Auth Methods
-  loginCustomer: (phone: string, name?: string) => boolean;
+  loginCustomer: (email: string, name?: string, phone?: string) => boolean;
   logoutCustomer: () => void;
-  updateCustomer: (phone: string, name: string, addresses: string[]) => void;
+  updateCustomer: (email: string, name: string, phone: string, addresses: string[]) => void;
   loginAdmin: (username: string) => boolean;
   logoutAdmin: () => void;
   
@@ -258,8 +260,8 @@ const DEFAULT_PRODUCTS: Product[] = [
 ];
 
 const DEFAULT_CUSTOMERS: Customer[] = [
-  { phone: "9876543210", name: "Alice Johnson", createdAt: "2026-08-01T12:00:00Z", addresses: ["123 Green St, Forest Hills, NY 11375"] },
-  { phone: "9988776655", name: "Bob Smith", createdAt: "2026-08-03T15:30:00Z", addresses: ["456 Beige Ave, Cream City, CA 90001"] }
+  { email: "alice@gmail.com", phone: "9876543210", name: "Alice Johnson", createdAt: "2026-08-01T12:00:00Z", addresses: ["123 Green St, Forest Hills, NY 11375"] },
+  { email: "bob@gmail.com", phone: "9988776655", name: "Bob Smith", createdAt: "2026-08-03T15:30:00Z", addresses: ["456 Beige Ave, Cream City, CA 90001"] }
 ];
 
 const DEFAULT_ORDERS: Order[] = [
@@ -267,6 +269,7 @@ const DEFAULT_ORDERS: Order[] = [
     id: "ORD-1001",
     customerPhone: "9876543210",
     customerName: "Alice Johnson",
+    customerEmail: "alice@gmail.com",
     items: [
       { productId: "prod-1", name: "Disposable Urination Bag (SolvrBag)", price: 15, quantity: 2 },
       { productId: "prod-2", name: "Anti-Fog Helmet Visor Insert (SolvrShield)", price: 25, quantity: 1 }
@@ -287,6 +290,7 @@ const DEFAULT_ORDERS: Order[] = [
     id: "ORD-1002",
     customerPhone: "9988776655",
     customerName: "Bob Smith",
+    customerEmail: "bob@gmail.com",
     items: [
       { productId: "prod-3", name: "Ergonomic Posture Sensor (PostureSolvr)", price: 49, quantity: 1 }
     ],
@@ -462,7 +466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [orders, setOrders] = useState<Order[]>([]);
   const [cart, setCart] = useState<CartItem[]>([]);
-  const [currentUser, setCurrentUser] = useState<{ phone: string; name: string } | null>(null);
+  const [currentUser, setCurrentUser] = useState<{ email: string; phone: string; name: string } | null>(null);
   const [adminUser, setAdminUser] = useState<{ username: string } | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
@@ -500,7 +504,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       
       let initialCart: CartItem[] = [];
       if (parsedUser) {
-        const storedUserCart = localStorage.getItem(`solvr_cart_${parsedUser.phone}`);
+        const storedUserCart = localStorage.getItem(`solvr_cart_${parsedUser.email}`);
         initialCart = storedUserCart ? JSON.parse(storedUserCart) : [];
       } else {
         initialCart = storedCart ? JSON.parse(storedCart) : [];
@@ -575,7 +579,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (isLoaded) {
       localStorage.setItem("solvr_cart", JSON.stringify(cart));
       if (currentUser) {
-        localStorage.setItem(`solvr_cart_${currentUser.phone}`, JSON.stringify(cart));
+        localStorage.setItem(`solvr_cart_${currentUser.email}`, JSON.stringify(cart));
       }
     }
   }, [cart, currentUser, isLoaded]);
@@ -584,7 +588,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   useEffect(() => {
     if (isLoaded) {
       if (currentUser) {
-        const userCartStored = localStorage.getItem(`solvr_cart_${currentUser.phone}`);
+        const userCartStored = localStorage.getItem(`solvr_cart_${currentUser.email}`);
         setCart(userCartStored ? JSON.parse(userCartStored) : []);
       } else {
         // Clear active cart upon logout
@@ -664,30 +668,32 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCart([]);
   };
 
-  const loginCustomer = (phone: string, name?: string): boolean => {
-    const cleanPhone = phone.trim().replace(/\D/g, "");
+  const loginCustomer = (email: string, name?: string, phone?: string): boolean => {
+    const cleanEmail = email.trim().toLowerCase();
     
     // Look up customer
-    const existing = customers.find((c) => c.phone.trim().replace(/\D/g, "") === cleanPhone);
+    const existing = customers.find((c) => c.email && c.email.trim().toLowerCase() === cleanEmail);
     
     if (existing) {
       // Returning customer - login directly
-      setCurrentUser({ phone: existing.phone, name: existing.name });
+      setCurrentUser({ email: existing.email, phone: existing.phone, name: existing.name });
       return true;
     } else {
-      // New customer - needs name
-      if (!name || name.trim() === "") {
-        // Signal that name is required
+      // New customer - needs name and phone
+      if (!name || name.trim() === "" || !phone || phone.trim() === "") {
+        // Signal that name/phone are required
         return false;
       }
+      const cleanPhone = phone.trim().replace(/\D/g, "");
       // Create new customer
       const newCustomer: Customer = {
+        email: cleanEmail,
         phone: cleanPhone,
         name: name.trim(),
         createdAt: new Date().toISOString()
       };
       setCustomers((prev) => [...prev, newCustomer]);
-      setCurrentUser({ phone: newCustomer.phone, name: newCustomer.name });
+      setCurrentUser({ email: newCustomer.email, phone: newCustomer.phone, name: newCustomer.name });
       return true;
     }
   };
@@ -696,12 +702,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setCurrentUser(null);
   };
 
-  const updateCustomer = (phone: string, name: string, addresses: string[]) => {
+  const updateCustomer = (email: string, name: string, phone: string, addresses: string[]) => {
+    const cleanEmail = email.trim().toLowerCase();
+    const cleanPhone = phone.trim().replace(/\D/g, "");
     setCustomers((prev) =>
-      prev.map((c) => (c.phone === phone ? { ...c, name: name.trim(), addresses } : c))
+      prev.map((c) => (c.email && c.email.trim().toLowerCase() === cleanEmail ? { ...c, name: name.trim(), phone: cleanPhone, addresses } : c))
     );
-    if (currentUser && currentUser.phone === phone) {
-      setCurrentUser({ phone, name: name.trim() });
+    if (currentUser && currentUser.email && currentUser.email.trim().toLowerCase() === cleanEmail) {
+      setCurrentUser({ email: cleanEmail, phone: cleanPhone, name: name.trim() });
     }
   };
 
@@ -741,6 +749,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
       customerPhone: currentUser.phone,
       customerName: currentUser.name,
+      customerEmail: currentUser.email,
       items: cart.map((item) => ({
         productId: item.product.id,
         name: item.product.name,

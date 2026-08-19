@@ -196,7 +196,10 @@ export const Navbar: React.FC = () => {
                     <h4 style={{ margin: 0, fontSize: "1.15rem", fontWeight: 800, color: "var(--primary-green)" }}>
                       {currentUser.name}
                     </h4>
-                    <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-muted)" }}>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-muted)", display: "block" }}>
+                      ✉️ {currentUser.email}
+                    </span>
+                    <span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--text-muted)", display: "block", marginTop: "2px" }}>
                       📞 {currentUser.phone}
                     </span>
                   </div>
