@@ -88,7 +88,10 @@ export default function CartPage() {
       setContactPhone(currentUser.phone);
       
       // Auto-select first address if they have saved ones
-      const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase());
+      const customer = customers.find((c) => 
+        (c.phone && currentUser?.phone && c.phone.toString().replace(/\D/g, "") === currentUser.phone.toString().replace(/\D/g, "")) ||
+        (c.email && currentUser?.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase())
+      );
       if (customer?.addresses && customer.addresses.length > 0) {
         setSelectedAddress(customer.addresses[0]);
       } else {

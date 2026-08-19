@@ -80,7 +80,10 @@ export default function SavedAddressesPage() {
   }
 
   // Find customer data to read addresses
-  const customer = customers.find((c) => c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase());
+  const customer = customers.find((c) => 
+    (c.phone && currentUser?.phone && c.phone.toString().replace(/\D/g, "") === currentUser.phone.toString().replace(/\D/g, "")) ||
+    (c.email && currentUser?.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase())
+  );
   const addresses = customer?.addresses || [];
 
   const handleFormSubmit = (e: React.FormEvent) => {

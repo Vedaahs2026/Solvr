@@ -64,11 +64,18 @@ export default function MyOrdersPage() {
     );
   }
 
-  // Filter orders by email
-  const cleanUserEmail = currentUser.email.trim().toLowerCase();
-  const userOrders = orders.filter(
-    (o: Order) => o.customerEmail && o.customerEmail.trim().toLowerCase() === cleanUserEmail
-  );
+  // Filter orders by phone or email
+  const cleanUserPhone = currentUser.phone ? currentUser.phone.toString().replace(/\D/g, "") : "";
+  const cleanUserEmail = currentUser.email ? currentUser.email.trim().toLowerCase() : "";
+
+  const userOrders = orders.filter((o: Order) => {
+    const oPhone = o.customerPhone ? o.customerPhone.toString().replace(/\D/g, "") : "";
+    const oEmail = o.customerEmail ? o.customerEmail.trim().toLowerCase() : "";
+
+    if (cleanUserPhone && oPhone && cleanUserPhone === oPhone) return true;
+    if (cleanUserEmail && oEmail && cleanUserEmail === oEmail) return true;
+    return false;
+  });
 
   // Status mapping for the Timeline tracking bar
   const getStatusStep = (status: string) => {
