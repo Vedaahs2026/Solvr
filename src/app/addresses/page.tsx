@@ -373,7 +373,7 @@ export default function SavedAddressesPage() {
                       className="form-control"
                       placeholder="10 Digits"
                       value={contactPhone}
-                      onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, ""))}
+                      onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                       required
                     />
                   </div>

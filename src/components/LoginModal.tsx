@@ -127,7 +127,8 @@ export const LoginModal: React.FC = () => {
                 className="form-control"
                 placeholder="Enter 10-digit number"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+                onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+                maxLength={10}
                 required
                 autoFocus
               />

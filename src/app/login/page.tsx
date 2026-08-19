@@ -117,7 +117,8 @@ function LoginContent() {
               className="form-control"
               placeholder="Enter 10-digit number"
               value={phone}
-              onChange={(e) => setPhone(e.target.value.replace(/\D/g, ""))}
+              onChange={(e) => setPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
+              maxLength={10}
               required
               style={{ border: "1px solid rgba(6, 78, 59, 0.25)" }}
               autoFocus

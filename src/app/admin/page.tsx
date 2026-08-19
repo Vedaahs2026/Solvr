@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useApp, Product, Order, Customer, CustomAttribute, OrderItem, ProductFaq } from "@/context/AppContext";
+import { useApp, Product, Order, Customer, CustomAttribute, OrderItem, ProductFaq, BlogPost } from "@/context/AppContext";
 import Link from "next/link";
 
 // Helper to parse lists flexibly (handling bullet points, numbers, commas, semicolons, sentences, etc.)
@@ -37,7 +37,86 @@ function parseFlexibleList(inputText: string): string[] {
     .filter((p) => p.length > 0);
 }
 
-type AdminTab = "Dashboard" | "Reports" | "Inventory" | "Orders" | "Products" | "Customers" | "Banners";
+function ImageUploadField({
+  value,
+  onChange,
+  placeholder = "Image URL",
+  required = false
+}: {
+  value: string;
+  onChange: (url: string) => void;
+  placeholder?: string;
+  required?: boolean;
+}) {
+  const [isUploading, setIsUploading] = useState(false);
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await res.json();
+      if (res.ok && data.url) {
+        onChange(data.url);
+      } else {
+        alert(`Upload failed: ${data.error || "Unknown error"}`);
+      }
+    } catch (err: any) {
+      alert(`Upload error: ${err.message || String(err)}`);
+    } finally {
+      setIsUploading(false);
+      e.target.value = "";
+    }
+  };
+
+  return (
+    <div style={{ display: "flex", gap: "8px", alignItems: "center", flex: 1 }}>
+      <input
+        type="text"
+        className="form-control"
+        placeholder={placeholder}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        required={required}
+        style={{ flex: 1 }}
+      />
+      <label
+        className="btn-outline"
+        style={{
+          margin: 0,
+          cursor: isUploading ? "not-allowed" : "pointer",
+          padding: "8px 12px",
+          fontSize: "0.75rem",
+          whiteSpace: "nowrap",
+          backgroundColor: isUploading ? "rgba(6, 78, 59, 0.1)" : "transparent",
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "4px"
+        }}
+      >
+        {isUploading ? "⏳ Uploading..." : "📁 Upload Image"}
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          disabled={isUploading}
+          style={{ display: "none" }}
+        />
+      </label>
+    </div>
+  );
+}
+
+type AdminTab = "Dashboard" | "Reports" | "Inventory" | "Orders" | "Products" | "Customers" | "Banners" | "Blogs";
 
 export default function AdminPage() {
   const { 
@@ -54,7 +133,11 @@ export default function AdminPage() {
     heroBanners,
     addHeroBanner,
     updateHeroBanner,
-    deleteHeroBanner
+    deleteHeroBanner,
+    blogs,
+    addBlog,
+    updateBlog,
+    deleteBlog
   } = useApp();
 
   const [username, setUsername] = useState("");
@@ -79,6 +162,77 @@ export default function AdminPage() {
   const [btn1Link, setBtn1Link] = useState("");
   const [btn2Text, setBtn2Text] = useState("");
   const [btn2Link, setBtn2Link] = useState("");
+
+  // Blog Create/Edit States
+  const [isEditingBlog, setIsEditingBlog] = useState(false);
+  const [editingBlogId, setEditingBlogId] = useState<string | null>(null);
+  const [blogTitle, setBlogTitle] = useState("");
+  const [blogCategory, setBlogCategory] = useState("");
+  const [blogTagline, setBlogTagline] = useState("");
+  const [blogReadTime, setBlogReadTime] = useState("");
+  const [blogBodyText, setBlogBodyText] = useState("");
+
+  const handleSaveBlog = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!blogTitle.trim() || !blogCategory.trim() || !blogBodyText.trim()) {
+      alert("Title, Category, and Body content are required.");
+      return;
+    }
+
+    const bodyParagraphs = blogBodyText
+      .split("\n")
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+
+    const blogData = {
+      title: blogTitle.trim(),
+      category: blogCategory.trim(),
+      tagline: blogTagline.trim(),
+      readTime: blogReadTime.trim() || "3 min read",
+      body: bodyParagraphs
+    };
+
+    if (editingBlogId) {
+      const existing = blogs.find((b) => b.id === editingBlogId);
+      updateBlog({
+        ...blogData,
+        id: editingBlogId,
+        createdAt: existing?.createdAt || new Date().toISOString()
+      });
+      setIsEditingBlog(false);
+      setEditingBlogId(null);
+    } else {
+      addBlog(blogData);
+    }
+
+    setBlogTitle("");
+    setBlogCategory("");
+    setBlogTagline("");
+    setBlogReadTime("");
+    setBlogBodyText("");
+    alert("Blog post saved successfully!");
+  };
+
+  const handleStartEditBlog = (blog: BlogPost) => {
+    setIsEditingBlog(true);
+    setEditingBlogId(blog.id);
+    setBlogTitle(blog.title);
+    setBlogCategory(blog.category);
+    setBlogTagline(blog.tagline);
+    setBlogReadTime(blog.readTime);
+    setBlogBodyText(blog.body.join("\n\n"));
+    setActiveTab("Blogs");
+  };
+
+  const handleCancelBlogEdit = () => {
+    setIsEditingBlog(false);
+    setEditingBlogId(null);
+    setBlogTitle("");
+    setBlogCategory("");
+    setBlogTagline("");
+    setBlogReadTime("");
+    setBlogBodyText("");
+  };
 
   // Product Create/Edit States
   const [isEditing, setIsEditing] = useState(false);
@@ -629,7 +783,7 @@ export default function AdminPage() {
 
           {/* Navigation Options */}
           <nav style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            {(["Dashboard", "Reports", "Inventory", "Orders", "Products", "Customers", "Banners"] as AdminTab[]).map((tab) => {
+            {(["Dashboard", "Reports", "Inventory", "Orders", "Products", "Customers", "Banners", "Blogs"] as AdminTab[]).map((tab) => {
               const isActive = activeTab === tab;
               return (
                 <button
@@ -661,6 +815,7 @@ export default function AdminPage() {
                     {tab === "Products" && "🏷️"}
                     {tab === "Customers" && "👥"}
                     {tab === "Banners" && "📺"}
+                    {tab === "Blogs" && "📝"}
                   </span>
                   {tab}
                 </button>
@@ -1904,14 +2059,11 @@ export default function AdminPage() {
                       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
                         {prodImages.map((imgUrl, imgIdx) => (
                           <div key={imgIdx} style={{ display: "flex", gap: "8px", alignItems: "center" }}>
-                            <input
-                              type="text"
-                              className="form-control"
+                            <ImageUploadField
                               placeholder={`Image URL #${imgIdx + 1}`}
                               value={imgUrl}
-                              onChange={(e) => handleImageFieldChange(imgIdx, e.target.value)}
+                              onChange={(val) => handleImageFieldChange(imgIdx, val)}
                               required={imgIdx === 0}
-                              style={{ flex: 1 }}
                             />
                             {prodImages.length > 1 && (
                               <button
@@ -2248,7 +2400,7 @@ export default function AdminPage() {
                                   const stepsTextList = sec.content ? sec.content.split("\n") : [""];
                                   const stepImagesList = sec.stepImages || [];
                                   
-                                  return stepsTextList.map((stepText, stepIdx) => (
+                                  return stepsTextList.map((stepText: string, stepIdx: number) => (
                                     <div key={stepIdx} style={{ 
                                       display: "flex", 
                                       flexDirection: "column", 
@@ -2276,8 +2428,8 @@ export default function AdminPage() {
                                             cursor: "pointer"
                                           }}
                                           onClick={() => {
-                                            const newTexts = stepsTextList.filter((_, i) => i !== stepIdx);
-                                            const newImages = stepImagesList.filter((_, i) => i !== stepIdx);
+                                            const newTexts = stepsTextList.filter((_: string, i: number) => i !== stepIdx);
+                                            const newImages = stepImagesList.filter((_: string, i: number) => i !== stepIdx);
                                             handleRichSectionChange(idx, "content", newTexts.join("\n"));
                                             
                                             const updatedSections = richSections.map((s, i) => {
@@ -2333,13 +2485,11 @@ export default function AdminPage() {
                                         
                                         <div className="form-group" style={{ margin: 0 }}>
                                           <label style={{ fontSize: "0.75rem", fontWeight: 700 }}>Image URL (Optional)</label>
-                                          <input
-                                            type="text"
-                                            className="form-control"
-                                            placeholder="e.g. /main_banner.jpeg or external link"
+                                          <ImageUploadField
+                                            placeholder="e.g. /main_banner.jpeg or upload file"
                                             value={stepImagesList[stepIdx] || ""}
-                                            onChange={(e) => {
-                                              handleStepImageChange(idx, stepIdx, e.target.value);
+                                            onChange={(url) => {
+                                              handleStepImageChange(idx, stepIdx, url);
                                             }}
                                           />
                                         </div>
@@ -2690,13 +2840,11 @@ export default function AdminPage() {
                     </div>
                     <div className="form-group" style={{ flex: 1, minWidth: "260px" }}>
                       <label>Image Source Link (Required)</label>
-                      <input 
-                        type="text" 
-                        className="form-control" 
-                        placeholder="Paste image URL or public resource path" 
-                        value={bannerImage} 
-                        onChange={(e) => setBannerImage(e.target.value)} 
-                        required 
+                      <ImageUploadField
+                        placeholder="Paste image URL or upload image file"
+                        value={bannerImage}
+                        onChange={(url) => setBannerImage(url)}
+                        required
                       />
                     </div>
                   </div>
@@ -2961,6 +3109,215 @@ export default function AdminPage() {
                 )}
               </div>
             )}
+          </div>
+        )}
+
+        {/* --- 8. BLOGS VIEW --- */}
+        {activeTab === "Blogs" && (
+          <div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "32px" }}>
+              <div>
+                <h1 style={{ fontSize: "2.2rem", fontWeight: 800, color: "var(--primary-green)", marginBottom: "4px" }}>
+                  Blog Management
+                </h1>
+                <p style={{ color: "var(--text-muted)" }}>
+                  Create, edit, and publish blog articles displayed on the About Us page.
+                </p>
+              </div>
+            </div>
+
+            {/* Create / Edit Blog Form */}
+            <div style={{
+              backgroundColor: "var(--white)",
+              borderRadius: "24px",
+              padding: "32px",
+              boxShadow: "var(--shadow-sm)",
+              border: "1px solid rgba(6, 78, 59, 0.08)",
+              marginBottom: "40px"
+            }}>
+              <h3 style={{ fontSize: "1.3rem", color: "var(--primary-green)", fontWeight: 800, marginBottom: "20px" }}>
+                {isEditingBlog ? "✏️ Edit Blog Article" : "➕ Create New Blog Article"}
+              </h3>
+
+              <form onSubmit={handleSaveBlog} style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr", gap: "16px" }}>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontWeight: 700, fontSize: "0.85rem" }}>Article Title *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Why Every Traveller Should Carry a Disposable Urine Bag"
+                      value={blogTitle}
+                      onChange={(e) => setBlogTitle(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontWeight: 700, fontSize: "0.85rem" }}>Category *</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. Travel Essentials"
+                      value={blogCategory}
+                      onChange={(e) => setBlogCategory(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className="form-group" style={{ margin: 0 }}>
+                    <label style={{ fontWeight: 700, fontSize: "0.85rem" }}>Read Time</label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="e.g. 4 min read"
+                      value={blogReadTime}
+                      onChange={(e) => setBlogReadTime(e.target.value)}
+                    />
+                  </div>
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "0.85rem" }}>Tagline / Short Summary</label>
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="e.g. Unpredictable journeys require smart emergency preparations."
+                    value={blogTagline}
+                    onChange={(e) => setBlogTagline(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-group" style={{ margin: 0 }}>
+                  <label style={{ fontWeight: 700, fontSize: "0.85rem" }}>Body Paragraphs (separate paragraphs with new lines) *</label>
+                  <textarea
+                    className="form-control"
+                    rows={6}
+                    placeholder="Enter article paragraphs here. Separate each paragraph with a new line..."
+                    value={blogBodyText}
+                    onChange={(e) => setBlogBodyText(e.target.value)}
+                    required
+                  />
+                </div>
+
+                <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+                  {isEditingBlog && (
+                    <button
+                      type="button"
+                      className="btn-outline"
+                      onClick={handleCancelBlogEdit}
+                      style={{ padding: "12px 24px" }}
+                    >
+                      Cancel Edit
+                    </button>
+                  )}
+                  <button
+                    type="submit"
+                    className="btn-primary"
+                    style={{ padding: "12px 28px", fontWeight: 700 }}
+                  >
+                    {isEditingBlog ? "Update Blog Article" : "Publish Blog Article"}
+                  </button>
+                </div>
+              </form>
+            </div>
+
+            {/* Active Blogs List */}
+            <div style={{
+              backgroundColor: "var(--white)",
+              borderRadius: "24px",
+              padding: "32px",
+              boxShadow: "var(--shadow-sm)",
+              border: "1px solid rgba(6, 78, 59, 0.08)"
+            }}>
+              <h3 style={{ fontSize: "1.3rem", color: "var(--primary-green)", fontWeight: 800, marginBottom: "20px" }}>
+                📚 Published Articles ({blogs.length})
+              </h3>
+
+              {blogs.length === 0 ? (
+                <div style={{ textAlign: "center", padding: "40px", color: "var(--text-muted)" }}>
+                  No blog articles published yet. Create one above!
+                </div>
+              ) : (
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))", gap: "20px" }}>
+                  {blogs.map((b) => (
+                    <div
+                      key={b.id}
+                      style={{
+                        backgroundColor: "var(--bg-beige)",
+                        borderRadius: "16px",
+                        padding: "20px",
+                        border: "1px solid rgba(6, 78, 59, 0.1)",
+                        display: "flex",
+                        flexDirection: "column",
+                        justifyContent: "space-between",
+                        gap: "16px"
+                      }}
+                    >
+                      <div>
+                        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                          <span style={{
+                            backgroundColor: "rgba(6, 78, 59, 0.08)",
+                            color: "var(--primary-green)",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            padding: "3px 10px",
+                            borderRadius: "12px",
+                            textTransform: "uppercase"
+                          }}>
+                            {b.category}
+                          </span>
+                          <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                            {b.readTime}
+                          </span>
+                        </div>
+
+                        <h4 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--primary-green-dark)", margin: "0 0 8px 0" }}>
+                          {b.title}
+                        </h4>
+
+                        {b.tagline && (
+                          <p style={{ fontSize: "0.85rem", color: "var(--accent-gold)", fontWeight: 600, margin: "0 0 12px 0" }}>
+                            {b.tagline}
+                          </p>
+                        )}
+
+                        <p style={{
+                          fontSize: "0.85rem",
+                          color: "#475569",
+                          margin: 0,
+                          display: "-webkit-box",
+                          WebkitLineClamp: 3,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden"
+                        }}>
+                          {b.body.join(" ")}
+                        </p>
+                      </div>
+
+                      <div style={{ borderTop: "1px solid rgba(6, 78, 59, 0.1)", paddingTop: "12px", display: "flex", gap: "10px" }}>
+                        <button
+                          className="btn-outline"
+                          style={{ flex: 1, justifyContent: "center", fontSize: "0.85rem", padding: "8px" }}
+                          onClick={() => handleStartEditBlog(b)}
+                        >
+                          ✏️ Edit
+                        </button>
+                        <button
+                          className="btn-outline"
+                          style={{ flex: 1, justifyContent: "center", fontSize: "0.85rem", padding: "8px", color: "var(--error)", borderColor: "var(--error)" }}
+                          onClick={() => {
+                            if (confirm(`Are you sure you want to delete "${b.title}"?`)) {
+                              deleteBlog(b.id);
+                            }
+                          }}
+                        >
+                          🗑️ Delete
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         )}
 

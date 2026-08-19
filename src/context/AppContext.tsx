@@ -84,6 +84,16 @@ export interface HeroBanner {
   buttons?: HeroBannerButton[];
 }
 
+export interface BlogPost {
+  id: string;
+  title: string;
+  category: string;
+  tagline: string;
+  readTime: string;
+  body: string[];
+  createdAt: string;
+}
+
 export interface Order {
   id: string;
   customerPhone: string;
@@ -139,6 +149,12 @@ export interface AppContextType {
   addHeroBanner: (banner: Omit<HeroBanner, "id">) => void;
   updateHeroBanner: (banner: HeroBanner) => void;
   deleteHeroBanner: (id: string) => void;
+
+  // Blogs
+  blogs: BlogPost[];
+  addBlog: (blog: Omit<BlogPost, "id" | "createdAt">) => void;
+  updateBlog: (blog: BlogPost) => void;
+  deleteBlog: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -308,6 +324,139 @@ const DEFAULT_HERO_BANNERS: HeroBanner[] = [
   }
 ];
 
+const DEFAULT_BLOGS: BlogPost[] = [
+  {
+    id: "blog-1",
+    title: "Why Every Traveller Should Carry a Disposable Urine Bag",
+    category: "Travel Essentials",
+    tagline: "Unpredictable journeys require smart emergency preparations.",
+    readTime: "3 min read",
+    body: [
+      "Whether you are embarking on a long road trip across India or taking a flight with unpredictable delays, bathroom access can become a critical challenge.",
+      "A disposable urine bag is a compact, odourless, and spill-proof solution designed for emergency toilet situations when clean restrooms are unavailable or unreachable.",
+      "With active gel technology that solidifies liquid instantly, carrying a SOLVR urine bag ensures comfort, dignity, and hygiene wherever your journey takes you."
+    ],
+    createdAt: "2026-08-01T10:00:00Z"
+  },
+  {
+    id: "blog-2",
+    title: "The Ultimate Travel Emergency Hygiene Kit",
+    category: "Hygiene Tips",
+    tagline: "Essential pack items to ensure cleanliness on the go.",
+    readTime: "5 min read",
+    body: [
+      "A complete emergency kit is your best friend when exploring new destinations. Make sure to pack items like hand sanitizers, biodegradable wipes, and compact disposal bags.",
+      "Including a SOLVR disposable urine bag in your pack protects you from unsanitary public toilets, letting you travel with complete peace of mind.",
+      "Keep this kit in your dashboard glovebox or backpack side pocket for easy, immediate access during emergency traffic halts."
+    ],
+    createdAt: "2026-08-02T10:00:00Z"
+  },
+  {
+    id: "blog-3",
+    title: "How to Stay Hygienic During Long Road Trips",
+    category: "Road Trips",
+    tagline: "Tips and guidelines for long journeys on the highway.",
+    readTime: "4 min read",
+    body: [
+      "Long-distance highway travel in India often comes with the dilemma of unhygienic roadside washrooms, which carry risks of UTI and other infections.",
+      "Stay hydrated without fear by packing travel-friendly personal hygiene solutions that let you avoid holding your bladder for prolonged periods.",
+      "Always dispose of waste responsibly in public bins, and carry eco-conscious travel essentials to minimize environmental footprints."
+    ],
+    createdAt: "2026-08-03T10:00:00Z"
+  },
+  {
+    id: "blog-4",
+    title: "Women Travel Safety Essentials",
+    category: "Safety & Comfort",
+    tagline: "Empowering female travellers with hygienic alternatives.",
+    readTime: "4 min read",
+    body: [
+      "Safety during travel isn't just about security—it's also about health, comfort, and having access to clean, safe facilities at any hour.",
+      "Using dirty public washrooms exposes women to significant bacterial infections. A personal disposable urine bag acts as an immediate hygienic substitute.",
+      "Compact enough to fit into a clutch or purse, it provides a private and sanitary option whenever and wherever needed."
+    ],
+    createdAt: "2026-08-04T10:00:00Z"
+  },
+  {
+    id: "blog-5",
+    title: "Best Emergency Travel Products in India",
+    category: "Product Guides",
+    tagline: "Top-rated gadgets and items for modern Indian travellers.",
+    readTime: "6 min read",
+    body: [
+      "The Indian travel landscape is rapidly changing, and modern travellers are prioritizing convenience and emergency preparedness.",
+      "Top items include portable power banks, compact water purifiers, and solidifying disposable urine bags.",
+      "SOLVR leads the way by designing products tailored for local travel bottlenecks, traffic jams, and remote adventure trails."
+    ],
+    createdAt: "2026-08-05T10:00:00Z"
+  },
+  {
+    id: "blog-6",
+    title: "Toilet Emergencies During Traffic Jams",
+    category: "Commuting",
+    tagline: "Surviving peak hour gridlocks with smart preparation.",
+    readTime: "3 min read",
+    body: [
+      "Getting stuck in a multi-hour traffic jam in metropolitan cities like Bangalore, Mumbai, or Delhi is a common frustration.",
+      "Holding in urine can lead to discomfort and long-term health issues. An emergency solidifying urine bag is a clean, spill-proof alternative you can use inside your vehicle.",
+      "Designed with superabsorbent pads that turn liquid into gel instantly, it is completely leakproof and keeps your vehicle clean."
+    ],
+    createdAt: "2026-08-06T10:00:00Z"
+  },
+  {
+    id: "blog-7",
+    title: "Why Hygiene Matters While Travelling",
+    category: "Health & Wellness",
+    tagline: "Protecting your body from common travel illness factors.",
+    readTime: "4 min read",
+    body: [
+      "Travel exposes our immune systems to new environments, foods, and pathogens. Maintaining a high level of hygiene is key to preventing illness.",
+      "Wash your hands frequently, sanitize shared spaces, and avoid contact with contaminated surfaces in public toilets.",
+      "By carrying your own sanitary solutions, you take control of your wellness and ensure your holiday isn't ruined by avoidable infections."
+    ],
+    createdAt: "2026-08-07T10:00:00Z"
+  },
+  {
+    id: "blog-8",
+    title: "Made in India Innovation: The Story Behind SOLVR",
+    category: "Our Story",
+    tagline: "How we design products that solve local everyday challenges.",
+    readTime: "5 min read",
+    body: [
+      "SOLVR was born out of a simple observation: people buy solutions, not just products. We saw commuters struggling with poor road infrastructure and decided to act.",
+      "Our team of engineers in India spent months testing spillproof materials and high-absorption polymers to create a world-class urine bag.",
+      "We pride ourselves on local design and manufacturing, creating products that directly improve the lives of millions of Indian citizens."
+    ],
+    createdAt: "2026-08-08T10:00:00Z"
+  },
+  {
+    id: "blog-9",
+    title: "How Disposable Urine Bags Work",
+    category: "How It Works",
+    tagline: "A closer look at the science behind instant solidification.",
+    readTime: "3 min read",
+    body: [
+      "At first glance, a disposable urine bag looks simple, but it contains advanced superabsorbent polymer (SAP) technology.",
+      "When liquid enters the bag, the polymer instantly absorbs it—up to several hundred times its own weight—and turns it into a firm, leakproof gel.",
+      "The bag is designed with a spillproof collar and sealed side locks, making it safe to handle and throw away in any standard trash bin."
+    ],
+    createdAt: "2026-08-09T10:00:00Z"
+  },
+  {
+    id: "blog-10",
+    title: "Smart Travel Essentials for Families",
+    category: "Family Travel",
+    tagline: "Keeping kids and elderly relatives comfortable during trips.",
+    readTime: "5 min read",
+    body: [
+      "Travelling with children or elderly family members means unexpected bathroom emergencies can happen at any moment.",
+      "Rather than rushing to find a clean restroom, keeping a box of SOLVR disposable bags in your luggage keeps everyone safe and comfortable.",
+      "It is a unisex, easy-to-use solution that reduces travel stress and allows you to enjoy family moments to the fullest."
+    ],
+    createdAt: "2026-08-10T10:00:00Z"
+  }
+];
+
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -317,6 +466,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [adminUser, setAdminUser] = useState<{ username: string } | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
+  const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Load from LocalStorage on client mount
@@ -349,6 +499,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       const storedHeroBanners = localStorage.getItem("solvr_hero_banners");
       setHeroBanners(storedHeroBanners ? JSON.parse(storedHeroBanners) : DEFAULT_HERO_BANNERS);
 
+      const storedBlogs = localStorage.getItem("solvr_blogs");
+      setBlogs(storedBlogs ? JSON.parse(storedBlogs) : DEFAULT_BLOGS);
+
       setIsLoaded(true);
     }
   }, []);
@@ -377,6 +530,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem("solvr_hero_banners", JSON.stringify(heroBanners));
     }
   }, [heroBanners, isLoaded]);
+
+  useEffect(() => {
+    if (isLoaded) {
+      localStorage.setItem("solvr_blogs", JSON.stringify(blogs));
+    }
+  }, [blogs, isLoaded]);
 
   useEffect(() => {
     if (isLoaded) {
@@ -605,6 +764,23 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     setHeroBanners((prev) => prev.filter((b) => b.id !== id));
   };
 
+  const addBlog = (blogData: Omit<BlogPost, "id" | "createdAt">) => {
+    const newBlog: BlogPost = {
+      ...blogData,
+      id: `blog-${Date.now()}`,
+      createdAt: new Date().toISOString()
+    };
+    setBlogs((prev) => [newBlog, ...prev]);
+  };
+
+  const updateBlog = (updatedBlog: BlogPost) => {
+    setBlogs((prev) => prev.map((b) => (b.id === updatedBlog.id ? updatedBlog : b)));
+  };
+
+  const deleteBlog = (id: string) => {
+    setBlogs((prev) => prev.filter((b) => b.id !== id));
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -633,7 +809,11 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         heroBanners,
         addHeroBanner,
         updateHeroBanner,
-        deleteHeroBanner
+        deleteHeroBanner,
+        blogs,
+        addBlog,
+        updateBlog,
+        deleteBlog
       }}
     >
       {children}

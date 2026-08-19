@@ -689,7 +689,7 @@ export default function CartPage() {
                             className="form-control"
                             placeholder="10 Digits"
                             value={contactPhone}
-                            onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, ""))}
+                            onChange={(e) => setContactPhone(e.target.value.replace(/\D/g, "").slice(0, 10))}
                             required
                             style={{ border: "1px solid rgba(6, 78, 59, 0.25)" }}
                           />

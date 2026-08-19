@@ -3,105 +3,13 @@
 import React from "react";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-
-// Detailed content for each blog article so they are readable in a modal
-const BLOG_CONTENTS: Record<string, { category: string; tagline: string; body: string[] }> = {
-  "Why Every Traveller Should Carry a Disposable Urine Bag": {
-    category: "Travel Essentials",
-    tagline: "Unpredictable journeys require smart emergency preparations.",
-    body: [
-      "Whether you are embarking on a long road trip across India or taking a flight with unpredictable delays, bathroom access can become a critical challenge.",
-      "A disposable urine bag is a compact, odourless, and spill-proof solution designed for emergency toilet situations when clean restrooms are unavailable or unreachable.",
-      "With active gel technology that solidifies liquid instantly, carrying a SOLVR urine bag ensures comfort, dignity, and hygiene wherever your journey takes you."
-    ]
-  },
-  "The Ultimate Travel Emergency Hygiene Kit": {
-    category: "Hygiene Tips",
-    tagline: "Essential pack items to ensure cleanliness on the go.",
-    body: [
-      "A complete emergency kit is your best friend when exploring new destinations. Make sure to pack items like hand sanitizers, biodegradable wipes, and compact disposal bags.",
-      "Including a SOLVR disposable urine bag in your pack protects you from unsanitary public toilets, letting you travel with complete peace of mind.",
-      "Keep this kit in your dashboard glovebox or backpack side pocket for easy, immediate access during emergency traffic halts."
-    ]
-  },
-  "How to Stay Hygienic During Long Road Trips": {
-    category: "Road Trips",
-    tagline: "Tips and guidelines for long journeys on the highway.",
-    body: [
-      "Long-distance highway travel in India often comes with the dilemma of unhygienic roadside washrooms, which carry risks of UTI and other infections.",
-      "Stay hydrated without fear by packing travel-friendly personal hygiene solutions that let you avoid holding your bladder for prolonged periods.",
-      "Always dispose of waste responsibly in public bins, and carry eco-conscious travel essentials to minimize environmental footprints."
-    ]
-  },
-  "Women Travel Safety Essentials": {
-    category: "Safety & Comfort",
-    tagline: "Empowering female travellers with hygienic alternatives.",
-    body: [
-      "Safety during travel isn't just about security—it's also about health, comfort, and having access to clean, safe facilities at any hour.",
-      "Using dirty public washrooms exposes women to significant bacterial infections. A personal disposable urine bag acts as an immediate hygienic substitute.",
-      "Compact enough to fit into a clutch or purse, it provides a private and sanitary option whenever and wherever needed."
-    ]
-  },
-  "Best Emergency Travel Products in India": {
-    category: "Product Guides",
-    tagline: "Top-rated gadgets and items for modern Indian travellers.",
-    body: [
-      "The Indian travel landscape is rapidly changing, and modern travellers are prioritizing convenience and emergency preparedness.",
-      "Top items include portable power banks, compact water purifiers, and solidifying disposable urine bags.",
-      "SOLVR leads the way by designing products tailored for local travel bottlenecks, traffic jams, and remote adventure trails."
-    ]
-  },
-  "Toilet Emergencies During Traffic Jams": {
-    category: "Commuting",
-    tagline: "Surviving peak hour gridlocks with smart preparation.",
-    body: [
-      "Getting stuck in a multi-hour traffic jam in metropolitan cities like Bangalore, Mumbai, or Delhi is a common frustration.",
-      "Holding in urine can lead to discomfort and long-term health issues. An emergency solidifying urine bag is a clean, spill-proof alternative you can use inside your vehicle.",
-      "Designed with superabsorbent pads that turn liquid into gel instantly, it is completely leakproof and keeps your vehicle clean."
-    ]
-  },
-  "Why Hygiene Matters While Travelling": {
-    category: "Health & Wellness",
-    tagline: "Protecting your body from common travel illness factors.",
-    body: [
-      "Travel exposes our immune systems to new environments, foods, and pathogens. Maintaining a high level of hygiene is key to preventing illness.",
-      "Wash your hands frequently, sanitize shared spaces, and avoid contact with contaminated surfaces in public toilets.",
-      "By carrying your own sanitary solutions, you take control of your wellness and ensure your holiday isn't ruined by avoidable infections."
-    ]
-  },
-  "Made in India Innovation: The Story Behind SOLVR": {
-    category: "Our Story",
-    tagline: "How we design products that solve local everyday challenges.",
-    body: [
-      "SOLVR was born out of a simple observation: people buy solutions, not just products. We saw commuters struggling with poor road infrastructure and decided to act.",
-      "Our team of engineers in India spent months testing spillproof materials and high-absorption polymers to create a world-class urine bag.",
-      "We pride ourselves on local design and manufacturing, creating products that directly improve the lives of millions of Indian citizens."
-    ]
-  },
-  "How Disposable Urine Bags Work": {
-    category: "How It Works",
-    tagline: "A closer look at the science behind instant solidification.",
-    body: [
-      "At first glance, a disposable urine bag looks simple, but it contains advanced superabsorbent polymer (SAP) technology.",
-      "When liquid enters the bag, the polymer instantly absorbs it—up to several hundred times its own weight—and turns it into a firm, leakproof gel.",
-      "The bag is designed with a spillproof collar and sealed side locks, making it safe to handle and throw away in any standard trash bin."
-    ]
-  },
-  "Smart Travel Essentials for Families": {
-    category: "Family Travel",
-    tagline: "Keeping kids and elderly relatives comfortable during trips.",
-    body: [
-      "Travelling with children or elderly family members means unexpected bathroom emergencies can happen at any moment.",
-      "Rather than rushing to find a clean restroom, keeping a box of SOLVR disposable bags in your luggage keeps everyone safe and comfortable.",
-      "It is a unisex, easy-to-use solution that reduces travel stress and allows you to enjoy family moments to the fullest."
-    ]
-  }
-};
+import { useApp, BlogPost } from "@/context/AppContext";
 
 export default function About() {
+  const { blogs } = useApp();
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isSubmitted, setIsSubmitted] = React.useState(false);
-  const [activeBlog, setActiveBlog] = React.useState<{ title: string; readTime: string } | null>(null);
+  const [activeBlog, setActiveBlog] = React.useState<BlogPost | null>(null);
   
   const [formData, setFormData] = React.useState({
     name: "",
@@ -114,7 +22,20 @@ export default function About() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Simulating dealership email dispatch:", formData);
+    
+    const adminPhone = "15550192832";
+    const messageText = 
+      `*New Dealership Application - SOLVR*\n\n` +
+      `*Contact Name:* ${formData.name}\n` +
+      `*Company Name:* ${formData.company}\n` +
+      `*Email Address:* ${formData.email}\n` +
+      `*Phone Number:* ${formData.phone}\n` +
+      `*Partnership Type:* ${formData.type}\n` +
+      `*Message / Requirements:* ${formData.message}`;
+
+    const whatsappUrl = `https://wa.me/${adminPhone}?text=${encodeURIComponent(messageText)}`;
+    window.open(whatsappUrl, "_blank");
+
     setIsSubmitted(true);
     setTimeout(() => {
       setIsSubmitted(false);
@@ -127,7 +48,7 @@ export default function About() {
         type: "Distributor",
         message: ""
       });
-    }, 2000);
+    }, 2500);
   };
 
   return (
@@ -503,20 +424,9 @@ export default function About() {
               gap: "20px",
               marginTop: "24px"
             }}>
-              {[
-                { title: "Why Every Traveller Should Carry a Disposable Urine Bag", readTime: "3 min read" },
-                { title: "The Ultimate Travel Emergency Hygiene Kit", readTime: "5 min read" },
-                { title: "How to Stay Hygienic During Long Road Trips", readTime: "4 min read" },
-                { title: "Women Travel Safety Essentials", readTime: "4 min read" },
-                { title: "Best Emergency Travel Products in India", readTime: "6 min read" },
-                { title: "Toilet Emergencies During Traffic Jams", readTime: "3 min read" },
-                { title: "Why Hygiene Matters While Travelling", readTime: "4 min read" },
-                { title: "Made in India Innovation: The Story Behind SOLVR", readTime: "5 min read" },
-                { title: "How Disposable Urine Bags Work", readTime: "3 min read" },
-                { title: "Smart Travel Essentials for Families", readTime: "5 min read" }
-              ].map((blog, idx) => (
+              {blogs.map((blog) => (
                 <div 
-                  key={idx} 
+                  key={blog.id} 
                   style={{
                     backgroundColor: "var(--white)",
                     padding: "24px",
@@ -546,7 +456,7 @@ export default function About() {
                       textTransform: "uppercase",
                       letterSpacing: "0.05em"
                     }}>
-                      📖 Article
+                      📖 {blog.category || "Article"}
                     </div>
                     <h4 style={{ 
                       fontSize: "1rem", 
@@ -641,7 +551,7 @@ export default function About() {
               Dealership Application
             </h3>
             <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginBottom: "16px", textAlign: "left" }}>
-              Submit your company details. A notification email will be sent immediately, and we'll review your application within 2-3 business days.
+              Submit your company details to send a direct WhatsApp application message to our admin team.
             </p>
 
             {isSubmitted ? (
@@ -652,12 +562,12 @@ export default function About() {
                 borderRadius: "16px",
                 border: "1px solid var(--primary-green)" 
               }}>
-                <span style={{ fontSize: "3rem", display: "block", marginBottom: "16px" }}>✉️</span>
+                <span style={{ fontSize: "3rem", display: "block", marginBottom: "16px" }}>💬</span>
                 <h4 style={{ color: "var(--primary-green)", fontSize: "1.25rem", fontWeight: 800, marginBottom: "8px" }}>
-                  Application Sent Successfully!
+                  WhatsApp Application Opened!
                 </h4>
                 <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", margin: 0 }}>
-                  A dealership request email has been dispatched. Our team will contact you shortly.
+                  A WhatsApp message with your dealership details has been generated. Send the message in WhatsApp to complete your application.
                 </p>
               </div>
             ) : (
@@ -704,9 +614,10 @@ export default function About() {
                     <input
                       type="tel"
                       className="form-control"
-                      placeholder="e.g. +91 99999 99999"
+                      placeholder="e.g. 99999 99999"
                       value={formData.phone}
-                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value.replace(/\D/g, "").slice(0, 10) })}
+                      maxLength={10}
                       required
                     />
                   </div>
@@ -745,9 +656,12 @@ export default function About() {
                 <button 
                   type="submit" 
                   className="btn-primary" 
-                  style={{ marginTop: "4px", width: "100%", justifyContent: "center", padding: "12px" }}
+                  style={{ marginTop: "4px", width: "100%", justifyContent: "center", padding: "12px", gap: "8px" }}
                 >
-                  Send Application Email
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L0 24l6.335-1.662c1.746.953 3.71 1.458 5.704 1.459h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+                  </svg>
+                  Send via WhatsApp
                 </button>
               </form>
             )}
@@ -813,7 +727,7 @@ export default function About() {
               display: "inline-block",
               marginBottom: "12px"
             }}>
-              {BLOG_CONTENTS[activeBlog.title]?.category || "Article"}
+              {activeBlog.category || "Article"}
             </span>
 
             <h3 style={{ 
@@ -834,13 +748,13 @@ export default function About() {
               letterSpacing: "0.05em",
               marginBottom: "24px"
             }}>
-              {activeBlog.readTime} • {BLOG_CONTENTS[activeBlog.title]?.tagline}
+              {activeBlog.readTime} {activeBlog.tagline ? `• ${activeBlog.tagline}` : ""}
             </p>
 
             <div style={{ borderTop: "1px dashed var(--border-color)", marginBottom: "24px" }} />
 
             <div style={{ display: "flex", flexDirection: "column", gap: "16px", color: "#334155", lineHeight: 1.8, fontSize: "1.05rem" }}>
-              {BLOG_CONTENTS[activeBlog.title]?.body.map((para, idx) => (
+              {activeBlog.body.map((para, idx) => (
                 <p key={idx}>{para}</p>
               ))}
             </div>
