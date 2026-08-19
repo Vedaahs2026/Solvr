@@ -75,49 +75,14 @@ export default function ProductDetailPage({ params }: PageProps) {
     );
   }
 
-  // Access restriction if not logged in
+  // Access restriction if not logged in - redirect to login page immediately
   if (!currentUser) {
     return (
       <>
         <Navbar />
-        <main style={{ minHeight: "70vh", position: "relative" }} className="flex-center">
-          {/* Blurred background representation */}
-          <div style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundImage: `url(${product.image})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            filter: "blur(20px) brightness(0.6)",
-            opacity: 0.15,
-            zIndex: 0
-          }} />
-
-          <div style={{
-            position: "relative",
-            zIndex: 1,
-            backgroundColor: "var(--white)",
-            padding: "40px",
-            borderRadius: "var(--radius-lg)",
-            boxShadow: "var(--shadow-lg)",
-            maxWidth: "500px",
-            textAlign: "center",
-            border: "1px solid var(--border-color)"
-          }}>
-            <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔒</div>
-            <h2 style={{ marginBottom: "12px" }}>Specification Access Locked</h2>
-            <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, marginBottom: "24px" }}>
-              To view the engineering details, problem analyses, custom specifications, and purchase options for <strong>{product.name}</strong>, please sign in.
-            </p>
-            <button className="btn-primary" onClick={() => router.push(`/login?redirect=/product/${product.id}`)} style={{ width: "100%", justifyContent: "center" }}>
-              Log In / Register
-            </button>
-            <Link href="/" style={{ display: "block", marginTop: "16px", fontSize: "0.9rem", color: "var(--primary-green)", fontWeight: 600 }}>
-              ← Return Home
-            </Link>
+        <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} className="flex-center">
+          <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "1.1rem" }}>
+            Redirecting to secure login...
           </div>
         </main>
       </>
