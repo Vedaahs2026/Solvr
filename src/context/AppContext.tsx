@@ -11,8 +11,9 @@ export interface CustomAttribute {
 export interface ProductRichSection {
   title: string;
   subtitle?: string;
-  type: "tickmarks" | "bullets" | "steps" | "badges" | "badges-gold";
+  type: "tickmarks" | "bullets" | "steps" | "badges" | "badges-gold" | "how-to-use";
   content: string;
+  stepImages?: string[];
 }
 
 export interface ProductFaq {

@@ -35,7 +35,7 @@ export default function Home() {
         overflow: "hidden"
       }}>
         <img 
-          src="/banner.png" 
+          src="/main_banner.jpeg" 
           alt="Let's Build Something Meaningful - SOLVR Banner" 
           style={{
             width: "100%",

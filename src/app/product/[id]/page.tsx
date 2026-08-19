@@ -149,11 +149,12 @@ export default function ProductDetailPage({ params }: PageProps) {
             <div style={{
               position: "sticky",
               top: "100px",
-              backgroundColor: "var(--white)",
+              backgroundColor: "#ffffff",
               borderRadius: "var(--radius-lg)",
               overflow: "hidden",
               boxShadow: "var(--shadow-md)",
-              border: "1px solid rgba(6, 78, 59, 0.05)"
+              border: "1px solid rgba(6, 78, 59, 0.05)",
+              padding: "24px"
             }}>
               <img 
                 src={product.image} 
@@ -162,7 +163,8 @@ export default function ProductDetailPage({ params }: PageProps) {
                   width: "100%",
                   height: "auto",
                   maxHeight: "500px",
-                  objectFit: "cover",
+                  objectFit: "contain",
+                  borderRadius: "var(--radius-md)",
                   display: "block"
                 }}
               />
@@ -466,6 +468,100 @@ export default function ProductDetailPage({ params }: PageProps) {
                               <p style={{ margin: "8px 0 0 0", fontSize: "0.95rem", lineHeight: 1.5, color: "var(--text-dark)", fontWeight: 500 }}>
                                 {step}
                               </p>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+
+                  case "how-to-use":
+                    return (
+                      <div key={sIdx} style={{
+                        backgroundColor: "var(--white)",
+                        padding: "40px",
+                        borderRadius: "24px",
+                        boxShadow: "var(--shadow-sm)",
+                        border: "1px solid rgba(6, 78, 59, 0.05)",
+                        textAlign: "left"
+                      }}>
+                        <h3 style={{ color: "var(--primary-green)", fontSize: "1.35rem", fontWeight: 800, marginBottom: "24px", display: "flex", alignItems: "center", gap: "10px", margin: "0 0 24px 0" }}>
+                          <span>🛠️</span> {section.title}
+                        </h3>
+                        {section.subtitle && (
+                          <p style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--primary-green-dark)", marginBottom: "16px", margin: "0 0 16px 0" }}>
+                            {section.subtitle}
+                          </p>
+                        )}
+                        <div style={{
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "16px"
+                        }}>
+                          {items.map((step, idx) => (
+                            <div key={idx} style={{
+                              backgroundColor: "var(--bg-beige-light)",
+                              padding: "20px 24px",
+                              borderRadius: "16px",
+                              border: "1px solid var(--border-color)",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              gap: "24px",
+                              flexWrap: "wrap",
+                              position: "relative"
+                            }}>
+                              {/* Left Side: Number badge and description */}
+                              <div style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "16px",
+                                flex: "1 1 280px"
+                              }}>
+                                <span style={{
+                                  width: "32px",
+                                  height: "32px",
+                                  borderRadius: "50%",
+                                  backgroundColor: "var(--accent-gold)",
+                                  color: "var(--primary-green)",
+                                  fontWeight: 800,
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  boxShadow: "var(--shadow-sm)",
+                                  flexShrink: 0
+                                }}>
+                                  {idx + 1}
+                                </span>
+                                <p style={{ margin: 0, fontSize: "1rem", lineHeight: 1.6, color: "var(--text-dark)", fontWeight: 500 }}>
+                                  {step}
+                                </p>
+                              </div>
+                              
+                              {/* Right Side: Step Image (reduced size) */}
+                              {section.stepImages && section.stepImages[idx] && (
+                                <div style={{
+                                  width: "180px",
+                                  height: "100px",
+                                  overflow: "hidden",
+                                  borderRadius: "8px",
+                                  backgroundColor: "var(--bg-beige-dark)",
+                                  flex: "0 0 180px",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center"
+                                }}>
+                                  <img 
+                                    src={section.stepImages[idx]} 
+                                    alt={`Step ${idx + 1}`} 
+                                    style={{
+                                      width: "100%",
+                                      height: "100%",
+                                      objectFit: "contain"
+                                    }}
+                                    loading="lazy"
+                                  />
+                                </div>
+                              )}
                             </div>
                           ))}
                         </div>

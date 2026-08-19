@@ -275,53 +275,60 @@ export default function CartPage() {
                             </span>
                           </div>
 
-                          {/* Qty & Size Controls (Matches layout in screenshot) */}
+                          {/* Qty Controls (Matches layout in screenshot) */}
                           <div style={{ display: "flex", gap: "12px", marginTop: "4px", alignItems: "center" }}>
-                            {/* Size selector */}
-                            <div style={{ position: "relative" }}>
-                              <select 
+                            {/* Qty Selector with Plus/Minus buttons */}
+                            <div style={{ 
+                              display: "flex", 
+                              alignItems: "center", 
+                              border: "1px solid var(--border-color)", 
+                              borderRadius: "12px", 
+                              overflow: "hidden", 
+                              backgroundColor: "var(--white)" 
+                            }}>
+                              <button 
+                                onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
                                 style={{
-                                  padding: "6px 28px 6px 12px",
-                                  fontSize: "0.85rem",
-                                  fontWeight: "700",
-                                  borderRadius: "12px",
-                                  border: "1px solid var(--border-color)",
-                                  backgroundColor: "var(--white)",
+                                  padding: "6px 14px",
+                                  fontSize: "0.95rem",
+                                  fontWeight: "800",
                                   color: "var(--text-dark)",
-                                  appearance: "none",
-                                  cursor: "pointer"
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  cursor: "pointer",
+                                  transition: "all 0.2s ease"
                                 }}
-                                defaultValue="S"
+                                title="Decrease Quantity"
                               >
-                                <option value="S">Size: S</option>
-                                <option value="M">Size: M</option>
-                                <option value="L">Size: L</option>
-                              </select>
-                              <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", fontSize: "0.6rem" }}>▼</span>
-                            </div>
-
-                            {/* Qty Selector */}
-                            <div style={{ position: "relative" }}>
-                              <select 
-                                value={item.quantity}
-                                onChange={(e) => updateCartQuantity(item.product.id, Number(e.target.value))}
+                                −
+                              </button>
+                              <span style={{ 
+                                padding: "0 8px", 
+                                fontSize: "0.9rem", 
+                                fontWeight: "700", 
+                                color: "var(--text-dark)",
+                                minWidth: "24px",
+                                textAlign: "center"
+                              }}>
+                                {item.quantity}
+                              </span>
+                              <button 
+                                onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
+                                disabled={item.quantity >= item.product.stock}
                                 style={{
-                                  padding: "6px 28px 6px 12px",
-                                  fontSize: "0.85rem",
-                                  fontWeight: "700",
-                                  borderRadius: "12px",
-                                  border: "1px solid var(--border-color)",
-                                  backgroundColor: "var(--white)",
-                                  color: "var(--text-dark)",
-                                  appearance: "none",
-                                  cursor: "pointer"
+                                  padding: "6px 14px",
+                                  fontSize: "0.95rem",
+                                  fontWeight: "800",
+                                  color: item.quantity >= item.product.stock ? "rgba(0, 0, 0, 0.25)" : "var(--text-dark)",
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  cursor: item.quantity >= item.product.stock ? "not-allowed" : "pointer",
+                                  transition: "all 0.2s ease"
                                 }}
+                                title="Increase Quantity"
                               >
-                                {[...Array(Math.min(10, item.product.stock))].map((_, idx) => (
-                                  <option key={idx + 1} value={idx + 1}>Qty: {idx + 1}</option>
-                                ))}
-                              </select>
-                              <span style={{ position: "absolute", right: "12px", top: "50%", transform: "translateY(-50%)", pointerEvents: "none", fontSize: "0.6rem" }}>▼</span>
+                                +
+                              </button>
                             </div>
 
                             {/* Remove button */}

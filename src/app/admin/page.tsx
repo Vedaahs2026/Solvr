@@ -144,6 +144,19 @@ export default function AdminPage() {
     setRichSections(updated);
   };
 
+  // Update a step image URL inside rich sections
+  const handleStepImageChange = (sectionIdx: number, stepIdx: number, value: string) => {
+    const updated = richSections.map((sec, i) => {
+      if (i === sectionIdx) {
+        const stepImages = [...(sec.stepImages || [])];
+        stepImages[stepIdx] = value;
+        return { ...sec, stepImages };
+      }
+      return sec;
+    });
+    setRichSections(updated);
+  };
+
   // Order Filter & Expand States
   const [filterStatus, setFilterStatus] = useState("All Statuses");
   const [filterFromDate, setFilterFromDate] = useState("");
@@ -2204,23 +2217,152 @@ export default function AdminPage() {
                                 <option value="tickmarks">✓ Tick marks (Checklist)</option>
                                 <option value="bullets">📦 Bullets (List)</option>
                                 <option value="steps">🛠️ Steps (Numbered cards)</option>
+                                <option value="how-to-use">🛠️ How to Use (Steps with Images)</option>
                                 <option value="badges">👥 Badges (Green outline pills)</option>
                                 <option value="badges-gold">🚗 Badges Gold (Beige outline pills)</option>
                               </select>
                             </div>
                           </div>
 
-                          <div className="form-group" style={{ margin: 0 }}>
-                            <label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Content / Matter</label>
-                            <textarea
-                              className="form-control"
-                              rows={4}
-                              placeholder="Enter list items (one per line, numbered, bulleted, or comma-separated tags)&#10;e.g.&#10;• Item 1&#10;• Item 2"
-                              value={sec.content}
-                              onChange={(e) => handleRichSectionChange(idx, "content", e.target.value)}
-                              required
-                            />
-                          </div>
+                          {sec.type !== "how-to-use" ? (
+                            <div className="form-group" style={{ margin: 0 }}>
+                              <label style={{ fontSize: "0.8rem", fontWeight: 700 }}>Content / Matter</label>
+                              <textarea
+                                className="form-control"
+                                rows={4}
+                                placeholder="Enter list items (one per line, numbered, bulleted, or comma-separated tags)&#10;e.g.&#10;• Item 1&#10;• Item 2"
+                                value={sec.content}
+                                onChange={(e) => handleRichSectionChange(idx, "content", e.target.value)}
+                                required
+                              />
+                            </div>
+                          ) : (
+                            /* Step-by-Step Editor for How to Use with Images */
+                            <div style={{ display: "flex", flexDirection: "column", gap: "16px", marginTop: "4px" }}>
+                              <label style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--primary-green)", textAlign: "left" }}>
+                                Configure How to Use Steps
+                              </label>
+                              
+                              <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
+                                {(() => {
+                                  const stepsTextList = sec.content ? sec.content.split("\n") : [""];
+                                  const stepImagesList = sec.stepImages || [];
+                                  
+                                  return stepsTextList.map((stepText, stepIdx) => (
+                                    <div key={stepIdx} style={{ 
+                                      display: "flex", 
+                                      flexDirection: "column", 
+                                      gap: "12px", 
+                                      backgroundColor: "rgba(6, 78, 59, 0.02)", 
+                                      padding: "16px", 
+                                      borderRadius: "12px",
+                                      border: "1px dashed var(--border-color)",
+                                      position: "relative",
+                                      textAlign: "left"
+                                    }}>
+                                      {/* Remove Step Button */}
+                                      {stepsTextList.length > 1 && (
+                                        <button
+                                          type="button"
+                                          style={{ 
+                                            position: "absolute", 
+                                            top: "12px", 
+                                            right: "12px", 
+                                            color: "var(--error)", 
+                                            fontSize: "0.8rem", 
+                                            fontWeight: "700",
+                                            background: "none",
+                                            border: "none",
+                                            cursor: "pointer"
+                                          }}
+                                          onClick={() => {
+                                            const newTexts = stepsTextList.filter((_, i) => i !== stepIdx);
+                                            const newImages = stepImagesList.filter((_, i) => i !== stepIdx);
+                                            handleRichSectionChange(idx, "content", newTexts.join("\n"));
+                                            
+                                            const updatedSections = richSections.map((s, i) => {
+                                              if (i === idx) {
+                                                return { ...s, content: newTexts.join("\n"), stepImages: newImages };
+                                              }
+                                              return s;
+                                            });
+                                            setRichSections(updatedSections);
+                                          }}
+                                        >
+                                          ✕ Remove
+                                        </button>
+                                      )}
+                                      
+                                      <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+                                        <span style={{
+                                          width: "24px",
+                                          height: "24px",
+                                          borderRadius: "50%",
+                                          backgroundColor: "var(--accent-gold)",
+                                          color: "var(--primary-green)",
+                                          fontWeight: 800,
+                                          fontSize: "0.8rem",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          justifyContent: "center",
+                                          flexShrink: 0
+                                        }}>
+                                          {stepIdx + 1}
+                                        </span>
+                                        <span style={{ fontSize: "0.85rem", fontWeight: "700", color: "var(--primary-green)" }}>
+                                          Step {stepIdx + 1}
+                                        </span>
+                                      </div>
+                                      
+                                      <div className="grid-2" style={{ gap: "16px" }}>
+                                        <div className="form-group" style={{ margin: 0 }}>
+                                          <label style={{ fontSize: "0.75rem", fontWeight: 700 }}>Description Text</label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder={`Description for step ${stepIdx + 1}`}
+                                            value={stepText}
+                                            onChange={(e) => {
+                                              const newTexts = [...stepsTextList];
+                                              newTexts[stepIdx] = e.target.value;
+                                              handleRichSectionChange(idx, "content", newTexts.join("\n"));
+                                            }}
+                                            required
+                                          />
+                                        </div>
+                                        
+                                        <div className="form-group" style={{ margin: 0 }}>
+                                          <label style={{ fontSize: "0.75rem", fontWeight: 700 }}>Image URL (Optional)</label>
+                                          <input
+                                            type="text"
+                                            className="form-control"
+                                            placeholder="e.g. /main_banner.jpeg or external link"
+                                            value={stepImagesList[stepIdx] || ""}
+                                            onChange={(e) => {
+                                              handleStepImageChange(idx, stepIdx, e.target.value);
+                                            }}
+                                          />
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ));
+                                })()}
+                              </div>
+                              
+                              <button
+                                type="button"
+                                className="btn-outline"
+                                style={{ alignSelf: "flex-start", padding: "6px 12px", fontSize: "0.8rem", borderRadius: "6px", marginTop: "4px" }}
+                                onClick={() => {
+                                  const stepsTextList = sec.content ? sec.content.split("\n") : [];
+                                  const newTexts = [...stepsTextList, ""];
+                                  handleRichSectionChange(idx, "content", newTexts.join("\n"));
+                                }}
+                              >
+                                + Add Step
+                              </button>
+                            </div>
+                          )}
                         </div>
                       ))
                     )}
