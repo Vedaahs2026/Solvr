@@ -121,6 +121,7 @@ export interface AppContextType {
   currentUser: { email: string; phone: string; name: string } | null;
   adminUser: { username: string } | null;
   customers: Customer[];
+  isLoaded: boolean;
   isLoginOpen: boolean;
   setIsLoginOpen: (open: boolean) => void;
   
@@ -172,8 +173,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
   const [heroBanners, setHeroBanners] = useState<HeroBanner[]>([]);
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [sessionInitialized, setSessionInitialized] = useState(false);
 
-  // Load initial data on mount from backend SQLite API routes
+  // 1. Immediately restore user and admin sessions synchronously from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const storedUser = localStorage.getItem("solvr_current_user");
+        const storedAdmin = localStorage.getItem("solvr_admin_user");
+        const storedCart = localStorage.getItem("solvr_cart");
+
+        if (storedUser) {
+          const parsedUser = JSON.parse(storedUser);
+          if (parsedUser) {
+            setCurrentUser(parsedUser);
+            const userCartKey = `solvr_cart_${parsedUser.phone || parsedUser.email || "guest"}`;
+            const storedUserCart = localStorage.getItem(userCartKey);
+            if (storedUserCart) {
+              setCart(JSON.parse(storedUserCart));
+            } else if (storedCart) {
+              setCart(JSON.parse(storedCart));
+            }
+          }
+        } else if (storedCart) {
+          setCart(JSON.parse(storedCart));
+        }
+
+        if (storedAdmin) {
+          setAdminUser(JSON.parse(storedAdmin));
+        }
+      } catch (err) {
+        console.error("Error restoring session from localStorage:", err);
+      } finally {
+        setSessionInitialized(true);
+      }
+    }
+  }, []);
+
+  // 2. Load remote database data asynchronously
   useEffect(() => {
     const loadData = async () => {
       try {
@@ -191,63 +228,44 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         if (Array.isArray(bannerRes)) setHeroBanners(bannerRes);
         if (Array.isArray(blogRes)) setBlogs(blogRes);
       } catch (err) {
-        console.error("Error loading SQLite seed data:", err);
+        console.error("Error loading remote seed data:", err);
+      } finally {
+        setIsLoaded(true);
       }
-
-      // Restore user-session properties from local storage on client
-      if (typeof window !== "undefined") {
-        const storedCart = localStorage.getItem("solvr_cart");
-        const storedUser = localStorage.getItem("solvr_current_user");
-        const storedAdmin = localStorage.getItem("solvr_admin_user");
-
-        const parsedUser = storedUser ? JSON.parse(storedUser) : null;
-        setCurrentUser(parsedUser);
-
-        let initialCart: CartItem[] = [];
-        if (parsedUser) {
-          const storedUserCart = localStorage.getItem(`solvr_cart_${parsedUser.email}`);
-          initialCart = storedUserCart ? JSON.parse(storedUserCart) : [];
-        } else {
-          initialCart = storedCart ? JSON.parse(storedCart) : [];
-        }
-        setCart(initialCart);
-        setAdminUser(storedAdmin ? JSON.parse(storedAdmin) : null);
-      }
-      setIsLoaded(true);
     };
 
     loadData();
   }, []);
 
-  // Save session states to LocalStorage when states change
+  // 3. Save session states to LocalStorage only AFTER session restoration is initialized
   useEffect(() => {
-    if (isLoaded) {
+    if (sessionInitialized && typeof window !== "undefined") {
       localStorage.setItem("solvr_cart", JSON.stringify(cart));
       if (currentUser) {
-        localStorage.setItem(`solvr_cart_${currentUser.email}`, JSON.stringify(cart));
+        localStorage.setItem(`solvr_cart_${currentUser.phone || currentUser.email || "guest"}`, JSON.stringify(cart));
       }
     }
-  }, [cart, currentUser, isLoaded]);
+  }, [cart, currentUser, sessionInitialized]);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (sessionInitialized && typeof window !== "undefined") {
       if (currentUser) {
         localStorage.setItem("solvr_current_user", JSON.stringify(currentUser));
       } else {
         localStorage.removeItem("solvr_current_user");
       }
     }
-  }, [currentUser, isLoaded]);
+  }, [currentUser, sessionInitialized]);
 
   useEffect(() => {
-    if (isLoaded) {
+    if (sessionInitialized && typeof window !== "undefined") {
       if (adminUser) {
         localStorage.setItem("solvr_admin_user", JSON.stringify(adminUser));
       } else {
         localStorage.removeItem("solvr_admin_user");
       }
     }
-  }, [adminUser, isLoaded]);
+  }, [adminUser, sessionInitialized]);
 
   // Methods
   const addProduct = (newProd: Omit<Product, "id">) => {
@@ -539,6 +557,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
         cart,
         currentUser,
         adminUser,
+        isLoaded,
         isLoginOpen,
         setIsLoginOpen,
         addProduct,

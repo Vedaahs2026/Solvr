@@ -7,7 +7,7 @@ import { ProductCard } from "@/components/ProductCard";
 import { useApp } from "@/context/AppContext";
 
 export default function ProductsPage() {
-  const { products } = useApp();
+  const { products, isLoaded } = useApp();
   const [searchQuery, setSearchQuery] = useState("");
   
   const [hasMounted, setHasMounted] = useState(false);
@@ -15,11 +15,30 @@ export default function ProductsPage() {
     setHasMounted(true);
   }, []);
 
-  if (!hasMounted) {
+  if (!hasMounted || !isLoaded) {
     return (
       <>
         <Navbar />
-        <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} />
+        <main style={{ padding: "80px 0", minHeight: "80vh", backgroundColor: "var(--bg-beige)" }}>
+          <div className="container" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "45vh" }}>
+            <div style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              border: "4px solid rgba(6, 78, 59, 0.15)",
+              borderTopColor: "var(--primary-green)",
+              animation: "spin 0.8s linear infinite",
+              marginBottom: "20px"
+            }} />
+            <h3 style={{ color: "var(--primary-green)", fontWeight: 800, fontSize: "1.25rem", margin: 0 }}>
+              Loading Products Catalog...
+            </h3>
+            <p style={{ color: "var(--text-muted)", fontSize: "0.9rem", marginTop: "8px" }}>
+              Fetching latest inventory solutions
+            </p>
+          </div>
+        </main>
+        <Footer />
       </>
     );
   }

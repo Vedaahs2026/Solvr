@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useApp, Product, Order, Customer, CustomAttribute, OrderItem, ProductFaq, BlogPost } from "@/context/AppContext";
 import Link from "next/link";
 
@@ -126,6 +126,7 @@ export default function AdminPage() {
     adminUser, 
     loginAdmin, 
     logoutAdmin, 
+    isLoaded,
     addProduct, 
     updateProduct, 
     deleteProduct,
@@ -139,6 +140,12 @@ export default function AdminPage() {
     updateBlog,
     deleteBlog
   } = useApp();
+
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -239,9 +246,9 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [prodName, setProdName] = useState("");
   const [prodDesc, setProdDesc] = useState("");
-  const [prodPrice, setProdPrice] = useState(0);
+  const [prodPrice, setProdPrice] = useState<number | "">("");
   const [prodOriginalPrice, setProdOriginalPrice] = useState<number | "">("");
-  const [prodStock, setProdStock] = useState(0);
+  const [prodStock, setProdStock] = useState<number | "">(0);
   const [prodImages, setProdImages] = useState<string[]>([""]);
   const [fetchedImage, setFetchedImage] = useState("");
 
@@ -435,8 +442,16 @@ export default function AdminPage() {
   const handleSaveProduct = (e: React.FormEvent) => {
     e.preventDefault();
     const firstImage = prodImages.find(url => url.trim() !== "");
-    if (!prodName || !prodPrice || !firstImage) {
-      alert("Name, Price, and at least one Image URL are required.");
+    const numPrice = Number(prodPrice);
+    const numOrigPrice = prodOriginalPrice !== "" ? Number(prodOriginalPrice) : undefined;
+
+    if (!prodName || prodPrice === "" || numPrice <= 0 || !firstImage) {
+      alert("Name, a valid Retail Price (> 0), and at least one Image URL are required.");
+      return;
+    }
+
+    if (numOrigPrice !== undefined && numPrice >= numOrigPrice) {
+      alert("Validation Error: Retail Price (₹) must be strictly less than the Original Price (₹).");
       return;
     }
 
@@ -452,8 +467,8 @@ export default function AdminPage() {
     const productData = {
       name: prodName,
       description: prodDesc,
-      price: Number(prodPrice),
-      originalPrice: prodOriginalPrice ? Number(prodOriginalPrice) : undefined,
+      price: numPrice,
+      originalPrice: numOrigPrice,
       stock: Number(prodStock),
       image: firstImage,
       images: prodImages.filter(url => url.trim() !== ""),
@@ -477,7 +492,7 @@ export default function AdminPage() {
     // Reset Form
     setProdName("");
     setProdDesc("");
-    setProdPrice(0);
+    setProdPrice("");
     setProdOriginalPrice("");
     setProdStock(0);
     setProdImages([""]);
@@ -513,7 +528,7 @@ export default function AdminPage() {
     setEditingId(null);
     setProdName("");
     setProdDesc("");
-    setProdPrice(0);
+    setProdPrice("");
     setProdOriginalPrice("");
     setProdStock(0);
     setProdImages([""]);
@@ -578,6 +593,45 @@ export default function AdminPage() {
 
   // 4. Real low stock count (<10 items remaining)
   const lowStockCount = products.filter(p => p.stock <= 10).length;
+
+  // --- RENDERING ADMIN LOADING SCREEN ---
+  if (!hasMounted || !isLoaded) {
+    return (
+      <main style={{
+        minHeight: "100vh",
+        backgroundColor: "var(--primary-green)",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        padding: "24px",
+        color: "var(--white)"
+      }}>
+        <div style={{
+          width: "56px",
+          height: "56px",
+          borderRadius: "50%",
+          backgroundColor: "var(--accent-gold)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          fontSize: "1.6rem",
+          fontWeight: 900,
+          color: "var(--primary-green)",
+          marginBottom: "16px",
+          boxShadow: "0 6px 20px rgba(0,0,0,0.2)"
+        }}>
+          S
+        </div>
+        <h3 style={{ fontSize: "1.2rem", color: "var(--white)", fontWeight: 800, margin: "0 0 6px 0", letterSpacing: "0.05em" }}>
+          SOLVR ADMIN PORTAL
+        </h3>
+        <p style={{ color: "var(--accent-gold)", fontSize: "0.85rem", margin: 0, opacity: 0.9 }}>
+          Verifying credentials & syncing database...
+        </p>
+      </main>
+    );
+  }
 
   // --- RENDERING ADMIN LOGIN SCREEN ---
   if (!adminUser) {
@@ -2022,8 +2076,9 @@ export default function AdminPage() {
                           type="number"
                           className="form-control"
                           min={1}
-                          value={prodPrice}
-                          onChange={(e) => setProdPrice(Number(e.target.value))}
+                          placeholder="e.g. 15"
+                          value={prodPrice === "" ? "" : prodPrice}
+                          onChange={(e) => setProdPrice(e.target.value === "" ? "" : Number(e.target.value))}
                           required
                         />
                       </div>
@@ -2034,8 +2089,8 @@ export default function AdminPage() {
                           type="number"
                           className="form-control"
                           min={1}
-                          placeholder="e.g. 13999"
-                          value={prodOriginalPrice || ""}
+                          placeholder="e.g. 30"
+                          value={prodOriginalPrice === "" ? "" : prodOriginalPrice}
                           onChange={(e) => setProdOriginalPrice(e.target.value === "" ? "" : Number(e.target.value))}
                         />
                       </div>
@@ -2047,11 +2102,26 @@ export default function AdminPage() {
                           className="form-control"
                           min={0}
                           value={prodStock}
-                          onChange={(e) => setProdStock(Number(e.target.value))}
+                          onChange={(e) => setProdStock(e.target.value === "" ? "" : Number(e.target.value))}
                           required
                         />
                       </div>
                     </div>
+
+                    {prodOriginalPrice !== "" && prodPrice !== "" && Number(prodPrice) >= Number(prodOriginalPrice) && (
+                      <div style={{
+                        backgroundColor: "rgba(239, 68, 68, 0.1)",
+                        color: "var(--error)",
+                        padding: "8px 12px",
+                        borderRadius: "8px",
+                        fontSize: "0.8rem",
+                        fontWeight: 700,
+                        marginBottom: "16px",
+                        borderLeft: "3px solid var(--error)"
+                      }}>
+                        ⚠️ Retail Price (₹{prodPrice}) must be strictly less than Original Price (₹{prodOriginalPrice}).
+                      </div>
+                    )}
 
                     <div className="form-group" style={{ display: "flex", flexDirection: "column", gap: "12px", textAlign: "left" }}>
                       <label style={{ fontWeight: 700 }}>Product Image URLs (First image will be default storefront thumbnail)</label>

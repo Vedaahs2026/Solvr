@@ -9,7 +9,7 @@ import { useRouter } from "next/navigation";
 
 export default function MyOrdersPage() {
   const router = useRouter();
-  const { currentUser, orders, products } = useApp();
+  const { currentUser, orders, products, isLoaded } = useApp();
 
   const [hasMounted, setHasMounted] = React.useState(false);
 
@@ -19,10 +19,10 @@ export default function MyOrdersPage() {
 
   // If user is not logged in, redirect to login page
   useEffect(() => {
-    if (!currentUser && hasMounted) {
+    if (!currentUser && hasMounted && isLoaded) {
       router.push("/login?redirect=/orders");
     }
-  }, [currentUser, router, hasMounted]);
+  }, [currentUser, router, hasMounted, isLoaded]);
 
   if (!hasMounted) {
     return (

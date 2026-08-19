@@ -46,19 +46,42 @@ interface PageProps {
 export default function ProductDetailPage({ params }: PageProps) {
   const router = useRouter();
   const { id } = use(params);
-  const { products, currentUser, addToCart } = useApp();
+  const { products, isLoaded, currentUser, addToCart } = useApp();
+  const [hasMounted, setHasMounted] = useState(false);
   const [quantity, setQuantity] = useState(1);
   const [addedMessage, setAddedMessage] = useState(false);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(null);
 
-  const product = products.find((p) => p.id === id);
-
-  // If user is not logged in, redirect to login page
   useEffect(() => {
-    if (!currentUser) {
-      router.push(`/login?redirect=/product/${id}`);
-    }
-  }, [currentUser, router, id]);
+    setHasMounted(true);
+  }, []);
+
+  if (!hasMounted || !isLoaded) {
+    return (
+      <>
+        <Navbar />
+        <main style={{ padding: "80px 0", minHeight: "80vh", backgroundColor: "var(--bg-beige)" }}>
+          <div className="container" style={{ textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: "45vh" }}>
+            <div style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              border: "4px solid rgba(6, 78, 59, 0.15)",
+              borderTopColor: "var(--primary-green)",
+              animation: "spin 0.8s linear infinite",
+              marginBottom: "20px"
+            }} />
+            <h3 style={{ color: "var(--primary-green)", fontWeight: 800, fontSize: "1.25rem", margin: 0 }}>
+              Loading Product Details...
+            </h3>
+          </div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return (
@@ -70,20 +93,6 @@ export default function ProductDetailPage({ params }: PageProps) {
           <Link href="/products">
             <button className="btn-primary">Back to Catalog</button>
           </Link>
-        </main>
-      </>
-    );
-  }
-
-  // Access restriction if not logged in - redirect to login page immediately
-  if (!currentUser) {
-    return (
-      <>
-        <Navbar />
-        <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} className="flex-center">
-          <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "1.1rem" }}>
-            Redirecting to secure login...
-          </div>
         </main>
       </>
     );

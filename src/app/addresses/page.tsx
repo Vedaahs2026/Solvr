@@ -9,7 +9,7 @@ import Link from "next/link";
 
 export default function SavedAddressesPage() {
   const router = useRouter();
-  const { currentUser, customers, updateCustomer } = useApp();
+  const { currentUser, customers, updateCustomer, isLoaded } = useApp();
   
   const [hasMounted, setHasMounted] = useState(false);
 
@@ -34,10 +34,10 @@ export default function SavedAddressesPage() {
     if (currentUser) {
       setFullName(currentUser.name);
       setContactPhone(currentUser.phone);
-    } else if (hasMounted) {
+    } else if (hasMounted && isLoaded) {
       router.push("/login?redirect=/addresses");
     }
-  }, [currentUser, router, hasMounted]);
+  }, [currentUser, router, hasMounted, isLoaded]);
 
   if (!hasMounted) {
     return (
