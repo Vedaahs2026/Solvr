@@ -12,6 +12,7 @@ export const Navbar: React.FC = () => {
   const { 
     cart, 
     currentUser, 
+    setIsLoginOpen,
     logoutCustomer, 
     updateCartQuantity, 
     removeFromCart, 
@@ -36,7 +37,7 @@ export const Navbar: React.FC = () => {
   const handleCheckout = () => {
     if (!currentUser) {
       setIsCartOpen(false);
-      router.push(`/login?redirect=${encodeURIComponent(pathname)}`);
+      setIsLoginOpen(true);
       return;
     }
 
@@ -98,17 +99,26 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Navigation Links */}
-          <div className="nav-links">
+          <div className="nav-links" style={{ display: "flex", gap: "32px" }}>
             <Link href="/" style={getLinkStyle("/")}>Home</Link>
-            <Link href="/about" style={getLinkStyle("/about")}>About</Link>
-            <Link href="/products" style={getLinkStyle("/products")}>Products</Link>
+            <Link href="/products" style={getLinkStyle("/products")}>All Products</Link>
+            <Link href="/about" style={getLinkStyle("/about")}>About Us</Link>
             <Link href="/contact" style={getLinkStyle("/contact")}>Contact Us</Link>
           </div>
 
           {/* Actions (Cart & Profile) */}
           <div className="nav-actions">
             {/* Cart Icon */}
-            <Link href="/cart">
+            <div 
+              onClick={() => {
+                if (!currentUser) {
+                  router.push("/login?redirect=/cart");
+                } else {
+                  router.push("/cart");
+                }
+              }}
+              style={{ cursor: "pointer" }}
+            >
               <button 
                 className="flex-center" 
                 style={{
@@ -125,7 +135,7 @@ export const Navbar: React.FC = () => {
                 title="Shopping Cart"
               >
                 🛒
-                {hasMounted && cartCount > 0 && (
+                {hasMounted && currentUser && cartCount > 0 && (
                   <span className="flex-center" style={{
                     position: "absolute",
                     top: "-5px",
@@ -143,7 +153,7 @@ export const Navbar: React.FC = () => {
                   </span>
                 )}
               </button>
-            </Link>
+            </div>
 
             {/* Profile Link with Dropdown */}
             <div 

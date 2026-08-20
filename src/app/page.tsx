@@ -2,13 +2,15 @@
 
 import React from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { ProductCard } from "@/components/ProductCard";
 import { useApp } from "@/context/AppContext";
 
 export default function Home() {
-  const { products, heroBanners } = useApp();
+  const router = useRouter();
+  const { products, heroBanners, currentUser, setIsLoginOpen } = useApp();
   const [currentSlide, setCurrentSlide] = React.useState(0);
 
   React.useEffect(() => {
@@ -183,23 +185,29 @@ export default function Home() {
                           {banner.buttons.map((btn, btnIdx) => {
                             const isPrimary = btnIdx === 0;
                             return (
-                              <Link key={btnIdx} href={btn.link}>
-                                <button 
-                                  className={isPrimary ? "btn-primary" : "btn-outline"} 
-                                  style={{
-                                    padding: "16px 36px",
-                                    fontSize: "1.05rem",
-                                    fontWeight: 800,
-                                    borderRadius: "30px",
-                                    boxShadow: isPrimary ? "var(--shadow-md)" : "none",
-                                    borderColor: isPrimary ? "transparent" : "var(--primary-green)",
-                                    color: isPrimary ? "var(--bg-beige)" : "var(--primary-green)",
-                                    backgroundColor: isPrimary ? "var(--primary-green)" : "transparent"
-                                  }}
-                                >
-                                  {btn.text}
-                                </button>
-                              </Link>
+                              <button 
+                                key={btnIdx}
+                                className={isPrimary ? "btn-primary" : "btn-outline"} 
+                                onClick={() => {
+                                  if (!currentUser) {
+                                    router.push(`/login?redirect=${encodeURIComponent(btn.link)}`);
+                                  } else {
+                                    router.push(btn.link);
+                                  }
+                                }}
+                                style={{
+                                  padding: "16px 36px",
+                                  fontSize: "1.05rem",
+                                  fontWeight: 800,
+                                  borderRadius: "30px",
+                                  boxShadow: isPrimary ? "var(--shadow-md)" : "none",
+                                  borderColor: isPrimary ? "transparent" : "var(--primary-green)",
+                                  color: isPrimary ? "var(--bg-beige)" : "var(--primary-green)",
+                                  backgroundColor: isPrimary ? "var(--primary-green)" : "transparent"
+                                }}
+                              >
+                                {btn.text}
+                              </button>
                             );
                           })}
                         </div>

@@ -53,6 +53,13 @@ export default function ProductDetailPage() {
     setHasMounted(true);
   }, []);
 
+  // Auth guard: Require login to view product details page
+  useEffect(() => {
+    if (hasMounted && isLoaded && !currentUser) {
+      router.push(`/login?redirect=/product/${id}`);
+    }
+  }, [hasMounted, isLoaded, currentUser, router, id]);
+
   if (!hasMounted || !isLoaded) {
     return (
       <>
@@ -74,6 +81,19 @@ export default function ProductDetailPage() {
           </div>
         </main>
         <Footer />
+      </>
+    );
+  }
+
+  if (hasMounted && isLoaded && !currentUser) {
+    return (
+      <>
+        <Navbar />
+        <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} className="flex-center">
+          <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "1.1rem" }}>
+            Redirecting to secure login...
+          </div>
+        </main>
       </>
     );
   }

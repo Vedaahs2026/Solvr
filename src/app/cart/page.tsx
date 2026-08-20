@@ -55,6 +55,7 @@ export default function CartPage() {
     currentUser, 
     customers, 
     orders, 
+    isLoaded,
     updateCustomer, 
     updateCartQuantity, 
     removeFromCart, 
@@ -81,6 +82,13 @@ export default function CartPage() {
     setHasMounted(true);
   }, []);
 
+  // Auth guard: Require login to view cart page
+  useEffect(() => {
+    if (hasMounted && isLoaded && !currentUser) {
+      router.push("/login?redirect=/cart");
+    }
+  }, [hasMounted, isLoaded, currentUser, router]);
+
   // Sync default values when logging in
   useEffect(() => {
     if (currentUser) {
@@ -100,11 +108,24 @@ export default function CartPage() {
     }
   }, [currentUser, customers]);
 
-  if (!hasMounted) {
+  if (!hasMounted || !isLoaded) {
     return (
       <>
         <Navbar />
         <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} />
+      </>
+    );
+  }
+
+  if (hasMounted && isLoaded && !currentUser) {
+    return (
+      <>
+        <Navbar />
+        <main style={{ minHeight: "80vh", backgroundColor: "var(--bg-beige)" }} className="flex-center">
+          <div style={{ textAlign: "center", color: "var(--text-muted)", fontSize: "1.1rem" }}>
+            Redirecting to secure login...
+          </div>
+        </main>
       </>
     );
   }

@@ -191,12 +191,12 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
             const storedUserCart = localStorage.getItem(userCartKey);
             if (storedUserCart) {
               setCart(JSON.parse(storedUserCart));
-            } else if (storedCart) {
-              setCart(JSON.parse(storedCart));
+            } else {
+              setCart([]);
             }
           }
-        } else if (storedCart) {
-          setCart(JSON.parse(storedCart));
+        } else {
+          setCart([]);
         }
 
         if (storedAdmin) {
@@ -371,6 +371,7 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
 
   const logoutCustomer = () => {
     setCurrentUser(null);
+    setCart([]);
   };
 
   const updateCustomer = (email: string, name: string, phone: string, addresses: string[]) => {
