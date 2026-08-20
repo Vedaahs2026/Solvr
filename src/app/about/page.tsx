@@ -506,10 +506,11 @@ export default function About() {
           backgroundColor: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "center",
           zIndex: 9999,
-          padding: "20px"
+          padding: "40px 20px",
+          overflowY: "auto"
         }} onClick={() => setIsModalOpen(false)}>
           <div style={{
             backgroundColor: "var(--white)",
@@ -680,10 +681,11 @@ export default function About() {
           backgroundColor: "rgba(0, 0, 0, 0.5)",
           backdropFilter: "blur(4px)",
           display: "flex",
-          alignItems: "center",
+          alignItems: "flex-start",
           justifyContent: "center",
           zIndex: 9999,
-          padding: "20px"
+          padding: "40px 20px",
+          overflowY: "auto"
         }} onClick={() => setActiveBlog(null)}>
           <div style={{
             backgroundColor: "var(--white)",
