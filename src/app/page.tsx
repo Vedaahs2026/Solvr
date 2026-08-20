@@ -37,12 +37,7 @@ export default function Home() {
         <img 
           src="/main_banner.jpeg" 
           alt="Let's Build Something Meaningful - SOLVR Banner" 
-          style={{
-            width: "100%",
-            height: "550px", // Fixed constant height
-            objectFit: "fill", // Stretches the image horizontally to fit
-            display: "block"
-          }}
+          className="home-hero-banner"
         />
       </section>
 
@@ -62,25 +57,7 @@ export default function Home() {
                 {/* Prev Arrow */}
                 <button 
                   onClick={() => setCurrentSlide((prev) => (prev - 1 + heroBanners.length) % heroBanners.length)}
-                  style={{
-                    position: "absolute",
-                    left: "-40px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--white)",
-                    border: "1px solid rgba(6, 78, 59, 0.15)",
-                    color: "var(--primary-green)",
-                    fontSize: "1.2rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 10,
-                    boxShadow: "var(--shadow-sm)"
-                  }}
+                  className="carousel-arrow carousel-arrow-left"
                   title="Previous Slide"
                 >
                   ◀
@@ -89,25 +66,7 @@ export default function Home() {
                 {/* Next Arrow */}
                 <button 
                   onClick={() => setCurrentSlide((prev) => (prev + 1) % heroBanners.length)}
-                  style={{
-                    position: "absolute",
-                    right: "-40px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    width: "44px",
-                    height: "44px",
-                    borderRadius: "50%",
-                    backgroundColor: "var(--white)",
-                    border: "1px solid rgba(6, 78, 59, 0.15)",
-                    color: "var(--primary-green)",
-                    fontSize: "1.2rem",
-                    cursor: "pointer",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    zIndex: 10,
-                    boxShadow: "var(--shadow-sm)"
-                  }}
+                  className="carousel-arrow carousel-arrow-right"
                   title="Next Slide"
                 >
                   ▶
@@ -251,7 +210,7 @@ export default function Home() {
                     <div style={{
                       flex: "1 1 400px",
                       minWidth: "300px",
-                      display: "center",
+                      display: "flex",
                       justifyContent: "center",
                       position: "relative"
                     }}>

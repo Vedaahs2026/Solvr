@@ -468,3 +468,135 @@ select:-webkit-autofill:focus {
     gap: 30px;
   }
 }
+
+/* Responsive Navbar styling */
+.nav-links {
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.mobile-menu-btn {
+  display: none !important;
+}
+
+.mobile-menu {
+  position: absolute;
+  top: var(--nav-height);
+  left: 0;
+  right: 0;
+  background-color: var(--white);
+  border-bottom: 1px solid var(--border-color);
+  box-shadow: var(--shadow-md);
+  padding: 16px 24px;
+  display: flex;
+  flex-direction: column;
+  z-index: 99;
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none !important;
+  }
+  .nav-actions {
+    gap: 12px;
+  }
+  .mobile-menu-btn {
+    display: flex !important;
+    background: none;
+    border: none;
+    color: var(--primary-green);
+    cursor: pointer;
+    padding: 8px;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+@media (min-width: 769px) {
+  .mobile-menu {
+    display: none !important;
+  }
+}
+
+/* Responsive Carousel Arrows */
+.carousel-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background-color: var(--white);
+  border: 1px solid rgba(6, 78, 59, 0.15);
+  color: var(--primary-green);
+  font-size: 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  box-shadow: var(--shadow-sm);
+  transition: all 0.25s ease;
+}
+
+.carousel-arrow-left {
+  left: -40px;
+}
+
+.carousel-arrow-right {
+  right: -40px;
+}
+
+@media (max-width: 1024px) {
+  .carousel-arrow-left {
+    left: 10px;
+  }
+  .carousel-arrow-right {
+    right: 10px;
+  }
+}
+
+@media (max-width: 768px) {
+  .carousel-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 1rem;
+  }
+  .carousel-arrow-left {
+    left: 5px;
+  }
+  .carousel-arrow-right {
+    right: 5px;
+  }
+}
+
+/* Responsive Layout Grids */
+.cart-layout-grid {
+  display: grid;
+  grid-template-columns: 2.8fr 1.5fr;
+  gap: 40px;
+  align-items: start;
+}
+
+.orders-layout-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1.1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 900px) {
+  .cart-layout-grid,
+  .orders-layout-grid {
+    grid-template-columns: 1fr;
+    gap: 30px;
+  }
+}
+

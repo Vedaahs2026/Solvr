@@ -13,7 +13,6 @@ export const Navbar: React.FC = () => {
     cart, 
     currentUser, 
     logoutCustomer, 
-    setIsLoginOpen, 
     updateCartQuantity, 
     removeFromCart, 
     placeOrder 
@@ -25,6 +24,7 @@ export const Navbar: React.FC = () => {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [profileModalTab, setProfileModalTab] = useState<"profile" | "address" | "orders">("profile");
   const [hasMounted, setHasMounted] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   useEffect(() => {
     setHasMounted(true);
@@ -64,6 +64,18 @@ export const Navbar: React.FC = () => {
     };
   };
 
+  const getMobileLinkStyle = (path: string) => {
+    const isActive = pathname === path;
+    return {
+      fontWeight: isActive ? "700" : "500",
+      color: isActive ? "var(--primary-green)" : "var(--text-muted)",
+      padding: "12px 0",
+      borderBottom: "1px solid rgba(6, 78, 59, 0.05)",
+      fontSize: "1.05rem",
+      transition: "all 0.2s ease"
+    };
+  };
+
   return (
     <>
       <nav style={{
@@ -86,11 +98,7 @@ export const Navbar: React.FC = () => {
           </Link>
 
           {/* Navigation Links */}
-          <div style={{
-            display: "flex",
-            gap: "28px",
-            alignItems: "center"
-          }}>
+          <div className="nav-links">
             <Link href="/" style={getLinkStyle("/")}>Home</Link>
             <Link href="/about" style={getLinkStyle("/about")}>About</Link>
             <Link href="/products" style={getLinkStyle("/products")}>Products</Link>
@@ -98,11 +106,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Actions (Cart & Profile) */}
-          <div style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "24px"
-          }}>
+          <div className="nav-actions">
             {/* Cart Icon */}
             <Link href="/cart">
               <button 
@@ -315,8 +319,38 @@ export const Navbar: React.FC = () => {
                 </div>
               )}
             </div>
+
+            {/* Hamburger Button (Mobile only) */}
+            <button 
+              className="mobile-menu-btn"
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              title="Toggle Menu"
+            >
+              {isMobileMenuOpen ? (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"></line>
+                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+              ) : (
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="12" x2="21" y2="12"></line>
+                  <line x1="3" y1="6" x2="21" y2="6"></line>
+                  <line x1="3" y1="18" x2="21" y2="18"></line>
+                </svg>
+              )}
+            </button>
           </div>
         </div>
+
+        {/* Mobile Menu Panel */}
+        {isMobileMenuOpen && (
+          <div className="mobile-menu">
+            <Link href="/" style={getMobileLinkStyle("/")} onClick={() => setIsMobileMenuOpen(false)}>Home</Link>
+            <Link href="/about" style={getMobileLinkStyle("/about")} onClick={() => setIsMobileMenuOpen(false)}>About</Link>
+            <Link href="/products" style={getMobileLinkStyle("/products")} onClick={() => setIsMobileMenuOpen(false)}>Products</Link>
+            <Link href="/contact" style={getMobileLinkStyle("/contact")} onClick={() => setIsMobileMenuOpen(false)}>Contact Us</Link>
+          </div>
+        )}
       </nav>
 
       {/* Cart Drawer */}

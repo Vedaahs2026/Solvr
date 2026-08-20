@@ -1,7 +1,7 @@
 "use client";
 
-import React, { use, useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useRouter, useParams } from "next/navigation";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { useApp } from "@/context/AppContext";
@@ -39,13 +39,10 @@ function parseFlexibleList(inputText: string): string[] {
     .filter((p) => p.length > 0);
 }
 
-interface PageProps {
-  params: Promise<{ id: string }>;
-}
-
-export default function ProductDetailPage({ params }: PageProps) {
+export default function ProductDetailPage() {
   const router = useRouter();
-  const { id } = use(params);
+  const params = useParams();
+  const id = params.id as string;
   const { products, isLoaded, currentUser, addToCart } = useApp();
   const [hasMounted, setHasMounted] = useState(false);
   const [quantity, setQuantity] = useState(1);

@@ -311,7 +311,7 @@ export default function MyOrdersPage() {
                           <div style={{ display: "flex", justifyContent: "space-between", position: "relative", zIndex: 3 }}>
                             
                             {/* Confirmed dot */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "120px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
                               <div style={{
                                 width: "20px",
                                 height: "20px",
@@ -334,7 +334,7 @@ export default function MyOrdersPage() {
                             </div>
 
                             {/* Shipped dot */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "120px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
                               <div style={{
                                 width: "20px",
                                 height: "20px",
@@ -357,7 +357,7 @@ export default function MyOrdersPage() {
                             </div>
 
                             {/* Delivered dot */}
-                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", width: "120px" }}>
+                            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
                               <div style={{
                                 width: "20px",
                                 height: "20px",
@@ -385,12 +385,8 @@ export default function MyOrdersPage() {
                     </div>
 
                     {/* Main Layout Grid: Items vs Delivery Details */}
-                    <div style={{
-                      display: "grid",
-                      gridTemplateColumns: "1.8fr 1.1fr",
+                    <div className="orders-layout-grid" style={{
                       padding: "32px",
-                      gap: "40px",
-                      alignItems: "start",
                       textAlign: "left"
                     }}>
                       

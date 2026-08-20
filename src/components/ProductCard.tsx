@@ -10,14 +10,9 @@ interface ProductCardProps {
 
 export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const router = useRouter();
-  const { currentUser, setIsLoginOpen } = useApp();
 
   const handleCardClick = () => {
-    if (!currentUser) {
-      setIsLoginOpen(true);
-    } else {
-      router.push(`/product/${product.id}`);
-    }
+    router.push(`/product/${product.id}`);
   };
 
   const isOutOfStock = product.stock <= 0;

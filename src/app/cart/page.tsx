@@ -214,12 +214,7 @@ export default function CartPage() {
                   </Link>
                 </div>
               ) : (
-                <div style={{
-                  display: "grid",
-                  gridTemplateColumns: "2.8fr 1.5fr",
-                  gap: "40px",
-                  alignItems: "start"
-                }}>
+                <div className="cart-layout-grid">
                   
                   {/* Left Column: Cart Items List */}
                   <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
