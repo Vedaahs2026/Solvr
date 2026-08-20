@@ -158,8 +158,8 @@ export const DEFAULT_HERO_BANNERS = [
     priceText: "₹15",
     originalPriceText: "₹30",
     buttons: [
-      { text: "Buy Now", link: "/product/prod-1" },
-      { text: "Learn More", link: "/product/prod-1" }
+      { text: "Buy Now", link: "/product/prod-1787156957905" },
+      { text: "Learn More", link: "/product/prod-1787156957905" }
     ]
   }
 ];

@@ -78,7 +78,13 @@ export default function ProductDetailPage() {
     );
   }
 
-  const product = products.find((p) => p.id === id);
+  let product = products.find((p) => p.id === id);
+
+  // Smart fallback: If exact ID match fails (e.g. legacy banner link 'prod-1' vs dynamic product ID),
+  // fallback to featured product or first available product in catalog
+  if (!product && products.length > 0) {
+    product = products.find((p) => p.isFeatured) || products[0];
+  }
 
   if (!product) {
     return (

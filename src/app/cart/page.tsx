@@ -221,152 +221,152 @@ export default function CartPage() {
                     {cart.map((item) => (
                       <div 
                         key={item.product.id}
-                        style={{
-                          backgroundColor: "var(--white)",
-                          borderRadius: "24px",
-                          padding: "24px",
-                          boxShadow: "var(--shadow-sm)",
-                          border: "1px solid var(--border-color)",
-                          display: "flex",
-                          gap: "24px",
-                          alignItems: "center"
-                        }}
+                        className="cart-item-card"
                       >
-                        {/* Image */}
-                        <img 
-                          src={item.product.image} 
-                          alt={item.product.name} 
-                          style={{
-                            width: "110px",
-                            height: "110px",
-                            objectFit: "cover",
-                            borderRadius: "16px"
-                          }}
-                        />
+                        {/* Top / Main Row */}
+                        <div className="cart-item-top">
+                          {/* Image */}
+                          <img 
+                            src={item.product.image} 
+                            alt={item.product.name} 
+                            className="cart-item-img"
+                          />
 
-                        {/* Mid Details */}
-                        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px", textAlign: "left" }}>
-                          <h3 style={{
-                            fontSize: "1.05rem",
-                            fontWeight: "800",
-                            color: "var(--text-dark)",
-                            textTransform: "uppercase",
-                            letterSpacing: "0.04em",
-                            margin: 0
-                          }}>
-                            {item.product.name}
-                          </h3>
-
-                          {/* Attribute Badge */}
-                          <div style={{ alignSelf: "flex-start" }}>
-                            <span style={{
-                              fontSize: "0.7rem",
-                              fontWeight: "700",
-                              color: "var(--text-muted)",
-                              backgroundColor: "rgba(6, 78, 59, 0.04)",
-                              padding: "4px 8px",
-                              borderRadius: "4px",
+                          {/* Mid Details */}
+                          <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "8px", textAlign: "left", minWidth: 0 }}>
+                            <h3 style={{
+                              fontSize: "1.05rem",
+                              fontWeight: "800",
+                              color: "var(--text-dark)",
                               textTransform: "uppercase",
-                              letterSpacing: "0.05em"
+                              letterSpacing: "0.04em",
+                              margin: 0,
+                              wordBreak: "break-word"
                             }}>
-                              CUSTOMIZED: STANDARD
-                            </span>
-                          </div>
+                              {item.product.name}
+                            </h3>
 
-                          {/* Qty Controls (Matches layout in screenshot) */}
-                          <div style={{ display: "flex", gap: "12px", marginTop: "4px", alignItems: "center" }}>
-                            {/* Qty Selector with Plus/Minus buttons */}
-                            <div style={{ 
-                              display: "flex", 
-                              alignItems: "center", 
-                              border: "1px solid var(--border-color)", 
-                              borderRadius: "12px", 
-                              overflow: "hidden", 
-                              backgroundColor: "var(--white)" 
-                            }}>
-                              <button 
-                                onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
-                                style={{
-                                  padding: "6px 14px",
-                                  fontSize: "0.95rem",
-                                  fontWeight: "800",
-                                  color: "var(--text-dark)",
-                                  backgroundColor: "transparent",
-                                  border: "none",
-                                  cursor: "pointer",
-                                  transition: "all 0.2s ease"
-                                }}
-                                title="Decrease Quantity"
-                              >
-                                −
-                              </button>
-                              <span style={{ 
-                                padding: "0 8px", 
-                                fontSize: "0.9rem", 
-                                fontWeight: "700", 
-                                color: "var(--text-dark)",
-                                minWidth: "24px",
-                                textAlign: "center"
+                            {/* Attribute Badge */}
+                            <div style={{ alignSelf: "flex-start" }}>
+                              <span style={{
+                                fontSize: "0.7rem",
+                                fontWeight: "700",
+                                color: "var(--text-muted)",
+                                backgroundColor: "rgba(6, 78, 59, 0.04)",
+                                padding: "4px 8px",
+                                borderRadius: "4px",
+                                textTransform: "uppercase",
+                                letterSpacing: "0.05em"
                               }}>
-                                {item.quantity}
+                                CUSTOMIZED: STANDARD
                               </span>
-                              <button 
-                                onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
-                                disabled={item.quantity >= item.product.stock}
-                                style={{
-                                  padding: "6px 14px",
-                                  fontSize: "0.95rem",
-                                  fontWeight: "800",
-                                  color: item.quantity >= item.product.stock ? "rgba(0, 0, 0, 0.25)" : "var(--text-dark)",
-                                  backgroundColor: "transparent",
-                                  border: "none",
-                                  cursor: item.quantity >= item.product.stock ? "not-allowed" : "pointer",
-                                  transition: "all 0.2s ease"
-                                }}
-                                title="Increase Quantity"
-                              >
-                                +
-                              </button>
                             </div>
 
-                            {/* Remove button */}
-                            <button 
-                              onClick={() => removeFromCart(item.product.id)}
-                              style={{
-                                color: "#ff5a5a",
-                                backgroundColor: "transparent",
-                                border: "none",
-                                fontWeight: "700",
-                                fontSize: "0.8rem",
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "4px",
-                                cursor: "pointer",
-                                marginLeft: "12px",
-                                textTransform: "uppercase"
-                              }}
-                            >
-                              🗑️ Remove
-                            </button>
-                          </div>
-                        </div>
+                            {/* Qty Controls */}
+                            <div style={{ display: "flex", gap: "12px", marginTop: "4px", alignItems: "center", flexWrap: "wrap" }}>
+                              {/* Qty Selector */}
+                              <div style={{ 
+                                display: "flex", 
+                                alignItems: "center", 
+                                border: "1px solid var(--border-color)", 
+                                borderRadius: "12px", 
+                                overflow: "hidden", 
+                                backgroundColor: "var(--white)" 
+                              }}>
+                                <button 
+                                  onClick={() => updateCartQuantity(item.product.id, item.quantity - 1)}
+                                  style={{
+                                    padding: "6px 14px",
+                                    fontSize: "0.95rem",
+                                    fontWeight: "800",
+                                    color: "var(--text-dark)",
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    cursor: "pointer"
+                                  }}
+                                  title="Decrease Quantity"
+                                >
+                                  −
+                                </button>
+                                <span style={{ 
+                                  padding: "0 8px", 
+                                  fontSize: "0.9rem", 
+                                  fontWeight: "700", 
+                                  color: "var(--text-dark)",
+                                  minWidth: "24px",
+                                  textAlign: "center"
+                                }}>
+                                  {item.quantity}
+                                </span>
+                                <button 
+                                  onClick={() => updateCartQuantity(item.product.id, item.quantity + 1)}
+                                  disabled={item.quantity >= item.product.stock}
+                                  style={{
+                                    padding: "6px 14px",
+                                    fontSize: "0.95rem",
+                                    fontWeight: "800",
+                                    color: item.quantity >= item.product.stock ? "rgba(0, 0, 0, 0.25)" : "var(--text-dark)",
+                                    backgroundColor: "transparent",
+                                    border: "none",
+                                    cursor: item.quantity >= item.product.stock ? "not-allowed" : "pointer"
+                                  }}
+                                  title="Increase Quantity"
+                                >
+                                  +
+                                </button>
+                              </div>
 
-                        {/* Right Price (Matches styling in screenshot) */}
-                        <div style={{ fontSize: "1.25rem", fontWeight: "800", color: "var(--text-dark)", minWidth: "90px", textAlign: "right" }}>
-                          ₹{item.product.price.toLocaleString()}
+                              {/* Remove button */}
+                              <button 
+                                onClick={() => removeFromCart(item.product.id)}
+                                style={{
+                                  color: "#ef4444",
+                                  backgroundColor: "transparent",
+                                  border: "none",
+                                  fontWeight: "800",
+                                  fontSize: "0.78rem",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "5px",
+                                  cursor: "pointer",
+                                  textTransform: "uppercase",
+                                  letterSpacing: "0.05em",
+                                  padding: "4px 6px",
+                                  borderRadius: "6px"
+                                }}
+                                title="Remove item from cart"
+                              >
+                                <svg 
+                                  width="16" 
+                                  height="16" 
+                                  viewBox="0 0 24 24" 
+                                  fill="none" 
+                                  stroke="#ef4444" 
+                                  strokeWidth="2.2" 
+                                  strokeLinecap="round" 
+                                  strokeLinejoin="round"
+                                >
+                                  <polyline points="3 6 5 6 21 6" />
+                                  <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                                  <line x1="10" y1="11" x2="10" y2="17" />
+                                  <line x1="14" y1="11" x2="14" y2="17" />
+                                </svg>
+                                <span>Remove</span>
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Right Price */}
+                          <div className="cart-price-col">
+                            ₹{item.product.price.toLocaleString()}
+                          </div>
                         </div>
                       </div>
                     ))}
                   </div>
 
-                  {/* Right Column: Price Summary Card (Matches layout in screenshot) */}
-                  <div style={{
-                    backgroundColor: "#fcf8f2", // Tinted beige background
-                    borderRadius: "24px",
-                    padding: "32px",
-                    border: "1px solid var(--border-color)",
-                    textAlign: "left"
-                  }}>
+                  {/* Right Column: Price Summary Card */}
+                  <div className="summary-card">
                     <h3 style={{
                       fontSize: "1.1rem",
                       fontWeight: "800",
