@@ -68,14 +68,16 @@ export default function MyOrdersPage() {
   const cleanUserPhone = currentUser.phone ? currentUser.phone.toString().replace(/\D/g, "") : "";
   const cleanUserEmail = currentUser.email ? currentUser.email.trim().toLowerCase() : "";
 
-  const userOrders = orders.filter((o: Order) => {
-    const oPhone = o.customerPhone ? o.customerPhone.toString().replace(/\D/g, "") : "";
-    const oEmail = o.customerEmail ? o.customerEmail.trim().toLowerCase() : "";
+  const userOrders = orders
+    .filter((o: Order) => {
+      const oPhone = o.customerPhone ? o.customerPhone.toString().replace(/\D/g, "") : "";
+      const oEmail = o.customerEmail ? o.customerEmail.trim().toLowerCase() : "";
 
-    if (cleanUserPhone && oPhone && cleanUserPhone === oPhone) return true;
-    if (cleanUserEmail && oEmail && cleanUserEmail === oEmail) return true;
-    return false;
-  });
+      if (cleanUserPhone && oPhone && cleanUserPhone === oPhone) return true;
+      if (cleanUserEmail && oEmail && cleanUserEmail === oEmail) return true;
+      return false;
+    })
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
   // Status mapping for the Timeline tracking bar
   const getStatusStep = (status: string) => {
@@ -438,21 +440,8 @@ export default function MyOrdersPage() {
                                   {item.name}
                                 </h4>
                                 
-                                <div>
-                                  <span style={{
-                                    fontSize: "0.65rem",
-                                    fontWeight: "800",
-                                    color: "var(--text-muted)",
-                                    backgroundColor: "rgba(6, 78, 59, 0.04)",
-                                    padding: "3px 6px",
-                                    borderRadius: "4px"
-                                  }}>
-                                    STANDARD FIT
-                                  </span>
-                                </div>
-
                                 <div style={{ fontSize: "0.85rem", color: "var(--text-muted)", fontWeight: "600", marginTop: "4px" }}>
-                                  SIZE: S &nbsp;•&nbsp; QTY: {item.quantity}
+                                  QTY: {item.quantity}
                                 </div>
                               </div>
 

@@ -42,6 +42,7 @@ export interface Customer {
   name: string;
   createdAt: string;
   addresses?: string[];
+  cart?: CartItem[];
 }
 
 export interface CartItem {
@@ -244,6 +245,22 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
       localStorage.setItem("solvr_cart", JSON.stringify(cart));
       if (currentUser) {
         localStorage.setItem(`solvr_cart_${currentUser.phone || currentUser.email || "guest"}`, JSON.stringify(cart));
+        
+        // Update local customers state
+        setCustomers((prev) =>
+          prev.map((c) =>
+            c.email && c.email.trim().toLowerCase() === currentUser.email.trim().toLowerCase()
+              ? { ...c, cart }
+              : c
+          )
+        );
+
+        // Sync cart to SQLite database
+        fetch("/api/customers", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: currentUser.email, cart })
+        }).catch((err) => console.error("Error syncing customer cart in SQLite:", err));
       }
     }
   }, [cart, currentUser, sessionInitialized]);
@@ -341,6 +358,9 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     if (existing) {
       // Returning customer - login directly
       setCurrentUser({ email: existing.email, phone: existing.phone, name: existing.name });
+      if (existing.cart && existing.cart.length > 0) {
+        setCart(existing.cart);
+      }
       return true;
     } else {
       // New customer - needs name and phone

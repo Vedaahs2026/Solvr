@@ -45,9 +45,16 @@ export async function ensureDb() {
           phone TEXT,
           name TEXT,
           createdAt TEXT,
-          addresses TEXT
+          addresses TEXT,
+          cart TEXT
         )
       `);
+
+      try {
+        await db.execute("ALTER TABLE customers ADD COLUMN cart TEXT");
+      } catch (e) {
+        // already exists
+      }
 
       await db.execute(`
         CREATE TABLE IF NOT EXISTS orders (

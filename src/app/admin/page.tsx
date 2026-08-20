@@ -37,6 +37,41 @@ function parseFlexibleList(inputText: string): string[] {
     .filter((p) => p.length > 0);
 }
 
+// Helper to parse DD/MM/YY or DD/MM/YYYY text input back into a Date object
+function parseInputDate(str: string): Date | null {
+  if (!str) return null;
+  const parts = str.split("/");
+  if (parts.length === 3) {
+    const day = parseInt(parts[0], 10);
+    const month = parseInt(parts[1], 10) - 1; // 0-indexed
+    let year = parseInt(parts[2], 10);
+    if (!isNaN(day) && !isNaN(month) && !isNaN(year)) {
+      if (year < 100) {
+        year += 2000;
+      }
+      const d = new Date(year, month, day);
+      if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
+        return d;
+      }
+    }
+  }
+  const d = new Date(str);
+  if (!isNaN(d.getTime())) return d;
+  return null;
+}
+
+// Helper to format typed numeric input automatically with slashes as DD/MM/YY
+function formatToDateInput(val: string): string {
+  const clean = val.replace(/[^\d]/g, "");
+  if (clean.length <= 2) {
+    return clean;
+  }
+  if (clean.length <= 4) {
+    return `${clean.slice(0, 2)}/${clean.slice(2)}`;
+  }
+  return `${clean.slice(0, 2)}/${clean.slice(2, 4)}/${clean.slice(4, 8)}`;
+}
+
 function ImageUploadField({
   value,
   onChange,
@@ -323,7 +358,13 @@ export default function AdminPage() {
   const [filterFromDate, setFilterFromDate] = useState("");
   const [filterToDate, setFilterToDate] = useState("");
   const [expandedOrders, setExpandedOrders] = useState<Record<string, boolean>>({});
+  const [expandedCustomers, setExpandedCustomers] = useState<Record<string, boolean>>({});
+  const toggleCustomerExpand = (email: string) => {
+    setExpandedCustomers((prev) => ({ ...prev, [email]: !prev[email] }));
+  };
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+  const [cancellingOrderId, setCancellingOrderId] = useState<string | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
 
   // Admin credentials
   const handleAdminLogin = (e: React.FormEvent) => {
@@ -1643,17 +1684,25 @@ export default function AdminPage() {
           const deliveredCount = orders.filter((o: Order) => o.status === "Delivered").length;
           const cancelledCount = orders.filter((o: Order) => o.status === "Cancelled").length;
 
-          // Filter orders in real-time
-          const filteredOrders = orders.filter((o: Order) => {
-            if (filterStatus !== "All Statuses" && o.status !== filterStatus) return false;
-            if (filterFromDate && new Date(o.date) < new Date(filterFromDate)) return false;
-            if (filterToDate) {
-              const toDateLimit = new Date(filterToDate);
-              toDateLimit.setHours(23, 59, 59, 999);
-              if (new Date(o.date) > toDateLimit) return false;
-            }
-            return true;
-          });
+          // Filter orders in real-time and sort descending by date (newest first)
+          const filteredOrders = orders
+            .filter((o: Order) => {
+              if (filterStatus !== "All Statuses" && o.status !== filterStatus) return false;
+              if (filterFromDate) {
+                const fromDate = parseInputDate(filterFromDate);
+                if (fromDate && new Date(o.date) < fromDate) return false;
+              }
+              if (filterToDate) {
+                const toDate = parseInputDate(filterToDate);
+                if (toDate) {
+                  const toDateLimit = new Date(toDate);
+                  toDateLimit.setHours(23, 59, 59, 999);
+                  if (new Date(o.date) > toDateLimit) return false;
+                }
+              }
+              return true;
+            })
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
           const toggleOrderExpand = (id: string) => {
             setExpandedOrders(prev => ({ ...prev, [id]: !prev[id] }));
@@ -1777,9 +1826,10 @@ export default function AdminPage() {
                   <div style={{ flex: 1, minWidth: "160px" }}>
                     <label style={{ display: "block", fontSize: "0.7rem", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>FROM DATE</label>
                     <input
-                      type="date"
+                      type="text"
+                      placeholder="DD/MM/YY"
                       value={filterFromDate}
-                      onChange={(e) => setFilterFromDate(e.target.value)}
+                      onChange={(e) => setFilterFromDate(formatToDateInput(e.target.value))}
                       className="form-control"
                       style={{ margin: 0 }}
                     />
@@ -1789,9 +1839,10 @@ export default function AdminPage() {
                   <div style={{ flex: 1, minWidth: "160px" }}>
                     <label style={{ display: "block", fontSize: "0.7rem", fontWeight: "800", color: "var(--text-muted)", textTransform: "uppercase", marginBottom: "6px" }}>TO DATE</label>
                     <input
-                      type="date"
+                      type="text"
+                      placeholder="DD/MM/YY"
                       value={filterToDate}
-                      onChange={(e) => setFilterToDate(e.target.value)}
+                      onChange={(e) => setFilterToDate(formatToDateInput(e.target.value))}
                       className="form-control"
                       style={{ margin: 0 }}
                     />
@@ -1884,14 +1935,8 @@ export default function AdminPage() {
                               onChange={(e) => {
                                 const newStatus = e.target.value as any;
                                 if (newStatus === "Cancelled") {
-                                  const reason = window.prompt("Please enter the reason for cancellation:");
-                                  if (reason === null) return;
-                                  const trimmedReason = reason.trim();
-                                  if (!trimmedReason) {
-                                    alert("Cancellation reason is required.");
-                                    return;
-                                  }
-                                  updateOrderStatus(ord.id, newStatus, trimmedReason);
+                                  setCancellingOrderId(ord.id);
+                                  setCancellationReason("");
                                 } else {
                                   updateOrderStatus(ord.id, newStatus);
                                 }
@@ -2811,7 +2856,7 @@ export default function AdminPage() {
         {activeTab === "Customers" && (
           <div>
             <h2 style={{ color: "var(--primary-green)", fontWeight: 800 }}>Registered Customers Log</h2>
-            <p style={{ color: "var(--text-muted)", marginTop: "4px" }}>Database log of users who have registered with mobile numbers and OTP verification.</p>
+            <p style={{ color: "var(--text-muted)", marginTop: "4px" }}>Database log of users who have registered on the platform.</p>
             
             <div style={{
               backgroundColor: "var(--white)",
@@ -2828,22 +2873,136 @@ export default function AdminPage() {
                   <thead>
                     <tr style={{ borderBottom: "2px solid var(--border-color)" }}>
                       <th style={{ padding: "16px" }}>Full Name</th>
+                      <th style={{ padding: "16px" }}>Email Address</th>
                       <th style={{ padding: "16px" }}>Phone Number</th>
                       <th style={{ padding: "16px" }}>Registration Date</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {customers.map((cust, idx) => (
-                      <tr key={idx} style={{ borderBottom: "1px solid rgba(6, 78, 59, 0.05)" }}>
-                        <td style={{ padding: "16px", fontWeight: "700", color: "var(--primary-green)" }}>
-                          {cust.name}
-                        </td>
-                        <td style={{ padding: "16px" }}>{cust.phone}</td>
-                        <td style={{ padding: "16px", color: "var(--text-muted)", fontSize: "0.85rem" }}>
-                          {new Date(cust.createdAt).toLocaleString()}
-                        </td>
-                      </tr>
-                    ))}
+                    {customers.map((cust, idx) => {
+                      const isExpanded = expandedCustomers[cust.email] === true;
+                      const customerOrders = orders.filter(
+                        (o) => (o.customerEmail && o.customerEmail.toLowerCase() === cust.email.toLowerCase()) || 
+                               (o.customerPhone && o.customerPhone.replace(/\D/g, "") === cust.phone.replace(/\D/g, ""))
+                      );
+
+                      return (
+                        <React.Fragment key={idx}>
+                          <tr 
+                            style={{ 
+                              borderBottom: "1px solid rgba(6, 78, 59, 0.05)",
+                              cursor: "pointer",
+                              backgroundColor: isExpanded ? "rgba(6, 78, 59, 0.01)" : "transparent"
+                            }}
+                            onClick={() => toggleCustomerExpand(cust.email)}
+                          >
+                            <td style={{ padding: "16px", fontWeight: "700", color: "var(--primary-green)" }}>
+                              {cust.name}
+                            </td>
+                            <td style={{ padding: "16px", color: "var(--text-dark)" }}>
+                              {cust.email}
+                            </td>
+                            <td style={{ padding: "16px" }}>{cust.phone}</td>
+                            <td style={{ padding: "16px", color: "var(--text-muted)", fontSize: "0.85rem", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                              <span>{new Date(cust.createdAt).toLocaleString()}</span>
+                              <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", transform: isExpanded ? "rotate(180deg)" : "none", transition: "transform 0.2s ease" }}>
+                                ▼
+                              </span>
+                            </td>
+                          </tr>
+                          {isExpanded && (
+                            <tr>
+                              <td colSpan={4} style={{ 
+                                padding: "20px 24px", 
+                                backgroundColor: "rgba(6, 78, 59, 0.02)",
+                                borderBottom: "1px solid var(--border-color)"
+                              }}>
+                                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "28px", textAlign: "left" }}>
+                                  
+                                  {/* Current Cart Section */}
+                                  <div>
+                                    <h5 style={{ margin: "0 0 12px 0", fontSize: "0.85rem", fontWeight: "800", color: "var(--primary-green)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                      Current Cart Items
+                                    </h5>
+                                    {!cust.cart || cust.cart.length === 0 ? (
+                                      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", margin: 0, fontStyle: "italic" }}>
+                                        Shopping cart is currently empty.
+                                      </p>
+                                    ) : (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                                        {cust.cart.map((item, i) => (
+                                          <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", fontSize: "0.85rem" }}>
+                                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                                              <img 
+                                                src={item.product.image} 
+                                                alt={item.product.name} 
+                                                style={{ width: "36px", height: "36px", borderRadius: "6px", objectFit: "cover", border: "1px solid var(--border-color)" }} 
+                                              />
+                                              <span>{item.product.name} <strong style={{ color: "var(--primary-green)" }}>x{item.quantity}</strong></span>
+                                            </div>
+                                            <span style={{ fontWeight: 700 }}>₹{(item.product.price * item.quantity).toLocaleString()}</span>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                  {/* Order History Section */}
+                                  <div>
+                                    <h5 style={{ margin: "0 0 12px 0", fontSize: "0.85rem", fontWeight: "800", color: "var(--primary-green)", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                                      Order History ({customerOrders.length} orders)
+                                    </h5>
+                                    {customerOrders.length === 0 ? (
+                                      <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", margin: 0, fontStyle: "italic" }}>
+                                        No orders placed yet.
+                                      </p>
+                                    ) : (
+                                      <div style={{ display: "flex", flexDirection: "column", gap: "10px", maxHeight: "250px", overflowY: "auto" }}>
+                                        {customerOrders.map((ord, i) => (
+                                          <div key={i} style={{ 
+                                            padding: "10px 12px", 
+                                            backgroundColor: "var(--white)", 
+                                            border: "1px solid var(--border-color)", 
+                                            borderRadius: "8px",
+                                            fontSize: "0.85rem",
+                                            display: "flex",
+                                            justifyContent: "space-between",
+                                            alignItems: "center"
+                                          }}>
+                                            <div>
+                                              <div style={{ fontWeight: "700", color: "var(--text-dark)" }}>
+                                                Order #{ord.id}
+                                              </div>
+                                              <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "2px" }}>
+                                                {new Date(ord.date).toLocaleDateString("en-GB")} • {ord.items.length} items
+                                              </div>
+                                            </div>
+                                            <div style={{ textAlign: "right" }}>
+                                              <div style={{ fontWeight: "700", color: "var(--text-dark)" }}>
+                                                ₹{ord.totalPrice.toLocaleString()}
+                                              </div>
+                                              <span style={{ 
+                                                fontSize: "0.7rem", 
+                                                fontWeight: "700", 
+                                                color: ord.status === "Cancelled" ? "#ef4444" : ord.status === "Delivered" ? "#10b981" : "#3b82f6",
+                                                textTransform: "uppercase"
+                                              }}>
+                                                {ord.status}
+                                              </span>
+                                            </div>
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                        </React.Fragment>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -3418,6 +3577,90 @@ export default function AdminPage() {
             </div>
           </div>
         )}
+
+      {/* Cancellation Reason Modal */}
+      {cancellingOrderId && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: "rgba(0, 0, 0, 0.5)",
+          backdropFilter: "blur(4px)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 9999,
+          padding: "20px"
+        }}>
+          <div style={{
+            backgroundColor: "var(--white)",
+            borderRadius: "24px",
+            padding: "28px",
+            width: "100%",
+            maxWidth: "450px",
+            boxShadow: "var(--shadow-lg)",
+            border: "1px solid var(--border-color)",
+            textAlign: "left",
+            animation: "modalFadeIn 0.3s ease-out"
+          }}>
+            <h3 style={{ color: "var(--primary-green)", fontSize: "1.25rem", fontWeight: 800, margin: "0 0 16px 0" }}>
+              Order Cancellation Reason
+            </h3>
+            <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", marginBottom: "16px" }}>
+              Please specify the reason for cancelling Order <strong>#{cancellingOrderId}</strong>. This reason will be visible to the customer.
+            </p>
+            
+            <textarea
+              style={{
+                width: "100%",
+                height: "100px",
+                padding: "12px",
+                borderRadius: "12px",
+                border: "1px solid var(--border-color)",
+                fontSize: "0.9rem",
+                fontFamily: "inherit",
+                resize: "none",
+                outline: "none",
+                marginBottom: "20px"
+              }}
+              placeholder="e.g. Out of stock, Delivery address unreachable, Customer requested cancellation..."
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+            />
+            
+            <div style={{ display: "flex", gap: "12px", justifyContent: "flex-end" }}>
+              <button
+                className="btn-secondary"
+                style={{ padding: "10px 20px" }}
+                onClick={() => {
+                  setCancellingOrderId(null);
+                  setCancellationReason("");
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn-primary"
+                style={{ padding: "10px 20px", backgroundColor: "#ef4444", borderColor: "#ef4444" }}
+                onClick={() => {
+                  const trimmed = cancellationReason.trim();
+                  if (!trimmed) {
+                    alert("Please provide a cancellation reason.");
+                    return;
+                  }
+                  updateOrderStatus(cancellingOrderId, "Cancelled", trimmed);
+                  setCancellingOrderId(null);
+                  setCancellationReason("");
+                }}
+              >
+                Confirm Cancellation
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       </main>
     </div>

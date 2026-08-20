@@ -60,7 +60,7 @@ export default function ProductDetailPage() {
     }
   }, [hasMounted, isLoaded, currentUser, router, id]);
 
-  if (!hasMounted || !isLoaded) {
+  if (!hasMounted || !isLoaded || !currentUser) {
     return (
       <>
         <Navbar />

@@ -10,7 +10,8 @@ export async function GET() {
       phone: row.phone,
       name: row.name,
       createdAt: row.createdAt,
-      addresses: JSON.parse(row.addresses || "[]")
+      addresses: JSON.parse(row.addresses || "[]"),
+      cart: JSON.parse(row.cart || "[]")
     }));
     return NextResponse.json(customers);
   } catch (error: any) {
@@ -43,6 +44,27 @@ export async function POST(req: Request) {
     return NextResponse.json({ success: true });
   } catch (error: any) {
     console.error("POST /api/customers error:", error);
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+}
+
+export async function PUT(req: Request) {
+  try {
+    await ensureDb();
+    const { email, cart } = await req.json();
+
+    if (!email) {
+      return NextResponse.json({ error: "Missing customer email" }, { status: 400 });
+    }
+
+    await db.execute({
+      sql: "UPDATE customers SET cart = ? WHERE email = ?",
+      args: [JSON.stringify(cart || []), email.trim().toLowerCase()]
+    });
+
+    return NextResponse.json({ success: true });
+  } catch (error: any) {
+    console.error("PUT /api/customers error:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }

@@ -36,11 +36,14 @@ export default function Home() {
         backgroundColor: "var(--bg-beige)",
         overflow: "hidden"
       }}>
-        <img 
-          src="/main_banner.jpeg" 
-          alt="Let's Build Something Meaningful - SOLVR Banner" 
-          className="home-hero-banner"
-        />
+        <picture>
+          <source media="(max-width: 768px)" srcSet="/mobileview_banner.jpeg" />
+          <img 
+            src="/main_banner.jpeg" 
+            alt="Let's Build Something Meaningful - SOLVR Banner" 
+            className="home-hero-banner"
+          />
+        </picture>
       </section>
 
       {/* Travel Without Worry Hero Section */}
