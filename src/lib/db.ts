@@ -59,9 +59,16 @@ export async function ensureDb() {
           status TEXT,
           items TEXT,
           totalPrice REAL,
-          shippingAddress TEXT
+          shippingAddress TEXT,
+          cancelReason TEXT
         )
       `);
+
+      try {
+        await db.execute("ALTER TABLE orders ADD COLUMN cancelReason TEXT");
+      } catch (e) {
+        // Column already exists
+      }
 
       await db.execute(`
         CREATE TABLE IF NOT EXISTS hero_banners (

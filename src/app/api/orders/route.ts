@@ -14,7 +14,8 @@ export async function GET() {
       status: row.status,
       items: JSON.parse(row.items || "[]"),
       totalPrice: Number(row.totalPrice),
-      shippingAddress: JSON.parse(row.shippingAddress || "null")
+      shippingAddress: JSON.parse(row.shippingAddress || "null"),
+      cancelReason: row.cancelReason || undefined
     }));
     return NextResponse.json(orders);
   } catch (error: any) {
@@ -69,16 +70,23 @@ export async function POST(req: Request) {
 export async function PUT(req: Request) {
   try {
     await ensureDb();
-    const { id, status } = await req.json();
+    const { id, status, cancelReason } = await req.json();
 
     if (!id || !status) {
       return NextResponse.json({ error: "Missing order ID or status" }, { status: 400 });
     }
 
-    await db.execute({
-      sql: "UPDATE orders SET status = ? WHERE id = ?",
-      args: [status, id]
-    });
+    if (status === "Cancelled" && cancelReason !== undefined) {
+      await db.execute({
+        sql: "UPDATE orders SET status = ?, cancelReason = ? WHERE id = ?",
+        args: [status, cancelReason, id]
+      });
+    } else {
+      await db.execute({
+        sql: "UPDATE orders SET status = ? WHERE id = ?",
+        args: [status, id]
+      });
+    }
 
     return NextResponse.json({ success: true });
   } catch (error: any) {

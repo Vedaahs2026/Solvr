@@ -1881,7 +1881,21 @@ export default function AdminPage() {
                           <div onClick={(e) => e.stopPropagation()}>
                             <select
                               value={ord.status}
-                              onChange={(e) => updateOrderStatus(ord.id, e.target.value as any)}
+                              onChange={(e) => {
+                                const newStatus = e.target.value as any;
+                                if (newStatus === "Cancelled") {
+                                  const reason = window.prompt("Please enter the reason for cancellation:");
+                                  if (reason === null) return;
+                                  const trimmedReason = reason.trim();
+                                  if (!trimmedReason) {
+                                    alert("Cancellation reason is required.");
+                                    return;
+                                  }
+                                  updateOrderStatus(ord.id, newStatus, trimmedReason);
+                                } else {
+                                  updateOrderStatus(ord.id, newStatus);
+                                }
+                              }}
                               style={{
                                 padding: "6px 28px 6px 12px",
                                 fontSize: "0.85rem",
@@ -2002,6 +2016,20 @@ export default function AdminPage() {
                                   fontStyle: "italic"
                                 }}>
                                   Placed via direct fallback checkout. Address string: {ord.customerName} ({ord.customerPhone})
+                                </div>
+                              )}
+                              
+                              {ord.status === "Cancelled" && ord.cancelReason && (
+                                <div style={{
+                                  marginTop: "16px",
+                                  backgroundColor: "rgba(239, 68, 68, 0.05)",
+                                  border: "1px solid rgba(239, 68, 68, 0.15)",
+                                  borderRadius: "12px",
+                                  padding: "16px",
+                                  fontSize: "0.85rem",
+                                  color: "#ef4444"
+                                }}>
+                                  <strong>Cancellation Reason:</strong> {ord.cancelReason}
                                 </div>
                               )}
                             </div>

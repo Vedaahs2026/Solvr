@@ -271,13 +271,21 @@ export default function MyOrdersPage() {
                           backgroundColor: "#fef2f2",
                           border: "1px solid #fecaca",
                           borderRadius: "12px",
-                          padding: "12px",
+                          padding: "16px",
                           color: "#ef4444",
-                          fontWeight: 700,
-                          fontSize: "0.9rem",
-                          textAlign: "center"
+                          textAlign: "center",
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: "6px"
                         }}>
-                          🚨 This order has been Cancelled.
+                          <span style={{ fontWeight: 700, fontSize: "0.95rem" }}>
+                            🚨 This order has been Cancelled.
+                          </span>
+                          {ord.cancelReason && (
+                            <span style={{ fontSize: "0.85rem", color: "#b91c1c", fontWeight: 500 }}>
+                              <strong>Reason:</strong> {ord.cancelReason}
+                            </span>
+                          )}
                         </div>
                       ) : (
                         <div style={{ position: "relative", maxWidth: "800px", margin: "0 auto" }}>

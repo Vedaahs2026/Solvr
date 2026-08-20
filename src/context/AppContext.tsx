@@ -105,6 +105,7 @@ export interface Order {
   items: OrderItem[];
   totalPrice: number;
   shippingAddress?: OrderAddress;
+  cancelReason?: string;
 }
 
 export interface AppContextType {
@@ -145,7 +146,7 @@ export interface AppContextType {
   
   // Orders Methods
   placeOrder: (shippingAddress?: OrderAddress) => Order | null;
-  updateOrderStatus: (orderId: string, status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled") => void;
+  updateOrderStatus: (orderId: string, status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled", cancelReason?: string) => void;
   
   // Hero Banners
   heroBanners: HeroBanner[];
@@ -477,14 +478,14 @@ export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children 
     return newOrder;
   };
 
-  const updateOrderStatus = (orderId: string, status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled") => {
+  const updateOrderStatus = (orderId: string, status: "Pending" | "Confirmed" | "Shipped" | "Delivered" | "Cancelled", cancelReason?: string) => {
     setOrders((prev) =>
-      prev.map((o) => (o.id === orderId ? { ...o, status } : o))
+      prev.map((o) => (o.id === orderId ? { ...o, status, cancelReason } : o))
     );
     fetch("/api/orders", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id: orderId, status })
+      body: JSON.stringify({ id: orderId, status, cancelReason })
     }).catch((err) => console.error("Error updating order status in SQLite:", err));
   };
 
